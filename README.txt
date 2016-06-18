@@ -47,6 +47,13 @@ sh importmongoraw.sh
 This will loop over all files in the path you specify in the shell script.  Be sure to change these paths!  This puts the cleaned data in the database. This file is on the GitHub. 
 
 
+***Index for faster searching***
+
+An index can be added for each field you think you’ll be searching on often.  I will upload samples of code when I start indexing my database.  It takes a while to do but will help out with speed in the end.  
+
+
+
+
 ***Sample ways of querying the mongo db from the terminal***
 
 > mongo
@@ -90,4 +97,12 @@ queryfields<-list(leagueid=1L,match_id=1L,teamfights.start=1L,teamfights.end=1L,
 mongo.count(mongo,cc,querymongo) # count records in cc
 ldf<-mongo.find.all(mongo,cc,querymongo,fields=queryfields,limit=50L) # main query, set query and returned fields
 
+
+
+***Within python ***
+import pymongo
+from pymongo import MongoClient
+client = MongoClient() # i think
+db = client.agg
+db.collection_names()
 
