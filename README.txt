@@ -52,6 +52,12 @@ This will loop over all files in the path you specify in the shell script.  Be s
 An index can be added for each field you think you’ll be searching on often.  I will upload samples of code when I start indexing my database.  It takes a while to do but will help out with speed in the end.  
 
 
+add index:
+> db.progames.createIndex({'players.account_id':1}) # 1 is ascending order, -1 descending, can add additional options to customize if desired
+
+get current indexes
+> db.progames.getIndexes()
+
 
 
 ***Sample ways of querying the mongo db from the terminal***
@@ -80,6 +86,8 @@ db.progames.find({'radiant_gold_adv': null},{'match_id':1,'leagueid':1}).limit(5
 
 count records in a query
 db.games.find({'leagueid': 0}).count() 
+
+
 
 
 
