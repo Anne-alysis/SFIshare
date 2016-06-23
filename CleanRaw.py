@@ -1,7 +1,8 @@
 
-import os,re
-dirrawdata="../data/raw/full/TI5/PlayoffsDay7/"
+import os,re,sys
+#dirrawdata="../data/raw/full/TI5/PlayoffsDay7/"
 
+dirrawdata = sys.argv[1]
 files = [f for f in os.listdir(dirrawdata) if re.match(r'.*\.results', f)]
 
 
