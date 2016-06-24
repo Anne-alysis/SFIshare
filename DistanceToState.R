@@ -1,3 +1,4 @@
+library(parallel)
 
 assignStates<-function(yteam,dist_thres=5){
         
@@ -46,7 +47,7 @@ assignStates<-function(yteam,dist_thres=5){
                                         if (any(sapply(cluster,length)==3)){
                                                 state<-"3-2"
                                         }else{
-                                                state<-"2-2"        
+                                                state<-"2-2-1"        
                                         }
                                 }
                         }
@@ -62,29 +63,83 @@ assignStates<-function(yteam,dist_thres=5){
         yteam
 }
 
+parallelStates<-function(yteam1,thres,statetranslate){
+        # split up data frame into 8 parts in a list in order to parallel process
+        ylist1<-lapply(1:(length(n)-1),function(i) yteam1[n[i]:(n[i+1]-1),])
+        # find states for each piece of data frame
+        ls<-mclapply(1:length(ylist1),function(i) assignStates(ylist1[[i]],thres),mc.cores=8)
+        # bind each resulting data frame into a single data frame
+        yteam1_5<-do.call(rbind.data.frame,ls)
+        # add parameters to resulting data frame
+        yteam1_5$thres<-thres
+        yteam1_5$event_id<-1:nrow(yteam1_5)
+        yteam1_5<-left_join(yteam1_5,statetranslate,by="state")
+        yteam1_5
+}
+
+statetranslate<-data.frame(state=c("5","4-1","3-2","3-1-1",
+                                   "2-2-1","2-1-1-1","1-1-1-1-1"),letter=LETTERS[1:7],num=1:7,
+                           stringsAsFactors = F)
 
 
 # read in distance files
 y<-read.csv(unzip("/Users/asallaska/SFI/DOTA/data/raw/full/TI5/PlayoffsDay7/776170591.dem.results.distance.zip"),
             stringsAsFactors = F,check.names =F)
 
-# yn<-data.frame(n=names(y)[13:32])
-# yn<-separate(yn,n,into=c("player1","player2"),sep="\\.")
-# unique(c(yn$player1,yn$player2))
-# 
-
 y<-select(y,-(3:12)) # remove absolute position information
 yteam1<-select(y,c(1:2,3:12)) # select only team 1 relative distance values 
 yteam2<-select(y,c(1:2,13:22))# select only team 2 relative distance values 
 
-ptm1<-proc.time()
-# find states for each relative distance grouping
-yteam1_5<-assignStates(yteam1[1:1000,],5)
-yteam1_10<-assignStates(yteam1[1:1000,],10)
-yteam2_5<-assignStates(yteam2,5)
-yteam2_10<-assignStates(yteam2,10)
 
-proc.time()-ptm1
+# find indicies to split on, in order to parallel process
+n<-floor(nrow(yteam1)/8)
+n<-c(1,n*(1:7),nrow(yteam1))
+
+# set distance threshold boundary
+thres<-5
+yteam1_5<-parallelStates(yteam1,thres,statetranslate)
+
+thres<-10
+yteam1_5<-parallelStates(yteam1,thres,statetranslate)
+
+
+
+yteam1_x<-rbind(yteam1_5,yteam1_10)
+
+# write out sequence for Simon's HMM model code
+write.table(matrix(c(nrow(yteam1_5),paste(yteam1_5$letter,collapse="")),ncol=1,nrow=2),
+            "test.seq",row.names=F,quote=F,col.names=F)
+
+
+# comparisons of different thresholds
+
+yteam1_dif<-cbind(yteam1_5,select(yteam1_10,state,letter,num))
+names(yteam1_dif)[18:20]<-paste0(names(yteam1_dif)[18:20],"10")
+yteam1_dif<-yteam1_dif %>% mutate(dif=num-num10)
+
+
+yteam1_x$state<-as.factor(yteam1_x$state)
+yteam1_x$thres<-as.factor(yteam1_x$thres)
+
+
+g<-ggplot(yteam1_x,aes(x=tick,y=num))+geom_line(aes(col=thres))+theme_light()+
+        guides(col=guide_legend(title="Distance \nThreshold"))+
+        labs(x="Time (tick)",y="State")+scale_y_continuous(breaks=seq(1:7),labels=statetranslate$state)+
+        ggtitle("TI5 Playoff Day 7: Match ID 776170591 (Team 0)")
+g
+
+with(yteam1_5,plot(event_id,as.factor(state),type='l',xlim=c(0,10000)))
+with(yteam1_10,lines(event_id,as.factor(state),type='l',col="red"))
+
+gdif<-ggplot(yteam1_dif,aes(x=tick,y=dif))+geom_line()+theme_light()+
+        labs(x="Time (tick)",y="Differences in State for\n 5 and 10 Distance Thresholds")
+        #ggtitle("TI5 Playoff Day 7: Match ID 776170591 (Team 0)")
+
+gdif
+
+grid.arrange(g,gdif,ncol=1)
+
+
 
 
 
