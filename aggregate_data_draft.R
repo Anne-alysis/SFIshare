@@ -27,16 +27,24 @@ for (i in 1:length(ldf)){ # loop over each game in the returned data
                 # pick out the pickbans from each element in list and bind them to a data frame.
                 temp1<-do.call(rbind.data.frame, ldf[[i]]$picks_bans) 
                 
-                # add fields in the main nest to the data frame.  each should be a 
-                # single value that will be copied into every row of the temp1 data frame
-                # allows you to keep track of other identifiable variables
-                temp1$match_id<-ifelse(!is.null(ldf[[i]]$match_id),ldf[[i]]$match_id,NA)
-                #temp1$version<-ldf[[i]]$version
-                temp1$radiant_win<-ifelse(!is.null(ldf[[i]]$radiant_win),ldf[[i]]$radiant_win,NA)
-                temp1$start_time<-ifelse(!is.null(ldf[[i]]$start_time),ldf[[i]]$start_time,NA)
-                temp1$leagueid<-ifelse(!is.null(ldf[[i]]$leagueid),ldf[[i]]$leagueid,NA)
-                temp1$lobby_type<-ifelse(!is.null(ldf[[i]]$lobby_type),ldf[[i]]$lobby_type,NA)
-                temp1$version<-ifelse(!is.null(ldf[[i]]$version),ldf[[i]]$version,NA)
+                variables<-outersect(names(queryfields),"picks_bans") # remove "picks_bans" from variables
+                # add new variables to df for query fields in a loop
+                for (j in variables){
+                        ind<-names(ldf[[i]])==j
+                        temp1[,j]<-ifelse(!is.null(ldf[[i]][ind][[1]]),ldf[[i]][ind][[1]],NA)
+                }
+                
+                # long way of adding variables, one by one
+                # # add fields in the main nest to the data frame.  each should be a 
+                # # single value that will be copied into every row of the temp1 data frame
+                # # allows you to keep track of other identifiable variables
+                # temp1$match_id<-ifelse(!is.null(ldf[[i]]$match_id),ldf[[i]]$match_id,NA)
+                # #temp1$version<-ldf[[i]]$version
+                # temp1$radiant_win<-ifelse(!is.null(ldf[[i]]$radiant_win),ldf[[i]]$radiant_win,NA)
+                # temp1$start_time<-ifelse(!is.null(ldf[[i]]$start_time),ldf[[i]]$start_time,NA)
+                # temp1$leagueid<-ifelse(!is.null(ldf[[i]]$leagueid),ldf[[i]]$leagueid,NA)
+                # temp1$lobby_type<-ifelse(!is.null(ldf[[i]]$lobby_type),ldf[[i]]$lobby_type,NA)
+                # temp1$version<-ifelse(!is.null(ldf[[i]]$version),ldf[[i]]$version,NA)
                 # bind all together
                 df<-rbind(df,temp1)
         }
