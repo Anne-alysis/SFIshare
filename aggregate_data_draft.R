@@ -11,7 +11,7 @@ cc<-"agg.progames" # or agg.progames, depending on your dataset
 # and arrange the nested json data into a data frame:
 # 
 querymongo<-list() # return everything, no filters
-queryfields<-list(match_id=1L,picks_bans=1L,radiant_win=1L) # only fields listed will be returned
+queryfields<-list(match_id=1L,picks_bans=1L,radiant_win=1L,start_time=1L,leagueid=1L,lobby_type=1L,version=1L) # only fields listed will be returned
 
 mongo.count(mongo,cc,querymongo) # count number of events in your query
 
@@ -27,25 +27,22 @@ for (i in 1:length(ldf)){ # loop over each game in the returned data
                 # pick out the pickbans from each element in list and bind them to a data frame.
                 temp1<-do.call(rbind.data.frame, ldf[[i]]$picks_bans) 
                 
-                ### for a more explicit calculation of the above line, see the commented loop below
-                # temp1<-data.frame()
-                # for (j in 1:l){ # loop over each pick ban json field and bind together
-                #         temp<-data.frame(ldf[[i]]$picks_bans[[j]])
-                #         temp1<-rbind(temp1,temp)
-                # }
-                
                 # add fields in the main nest to the data frame.  each should be a 
                 # single value that will be copied into every row of the temp1 data frame
                 # allows you to keep track of other identifiable variables
                 temp1$match_id<-ifelse(!is.null(ldf[[i]]$match_id),ldf[[i]]$match_id,NA)
                 #temp1$version<-ldf[[i]]$version
                 temp1$radiant_win<-ifelse(!is.null(ldf[[i]]$radiant_win),ldf[[i]]$radiant_win,NA)
+                temp1$start_time<-ifelse(!is.null(ldf[[i]]$start_time),ldf[[i]]$start_time,NA)
+                temp1$leagueid<-ifelse(!is.null(ldf[[i]]$leagueid),ldf[[i]]$leagueid,NA)
+                temp1$lobby_type<-ifelse(!is.null(ldf[[i]]$lobby_type),ldf[[i]]$lobby_type,NA)
+                temp1$version<-ifelse(!is.null(ldf[[i]]$version),ldf[[i]]$version,NA)
                 # bind all together
                 df<-rbind(df,temp1)
         }
 }
 # arrange columns in a better order with "select" 
-df<-df  %>% select(match_id:radiant_win,is_pick:order)
+df<-df  %>% select(match_id:version,is_pick:order)
 heroes<-fromJSON("/Users/asallaska/SFI/DOTA/heroes.json")
 heroes<-heroes$result$heroes
 heroes<-heroes %>% select(id,localized_name) %>% rename(hero_id=id,hero_name=localized_name)
