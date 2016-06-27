@@ -51,7 +51,7 @@ heroes<-heroes$result$heroes
 heroes<-heroes %>% select(id,localized_name) %>% rename(hero_id=id,hero_name=localized_name)
 
 df<-left_join(df,heroes,by="hero_id")
-
+write.csv(df,"../data/agg/draft_progames.csv",row.names=F)
 
 
 
