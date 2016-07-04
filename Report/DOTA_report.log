@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.16 (TeX Live 2015) (preloaded format=pdflatex 2015.5.24)  4 JUL 2016 10:51
+This is pdfTeX, Version 3.14159265-2.6-1.40.16 (TeX Live 2015) (preloaded format=pdflatex 2015.5.24)  4 JUL 2016 12:29
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -341,37 +341,87 @@ File: umsb.fd 2013/01/14 v3.01 AMS symbols B
  
  ======================================================================== 
 
-<GameBoard.pdf, id=1, 255.95625pt x 237.88875pt>
-File: GameBoard.pdf Graphic file (type pdf)
- <use GameBoard.pdf>
-Package pdftex.def Info: GameBoard.pdf used on input line 202.
+<./Figs/GameBoard.pdf, id=1, 255.95625pt x 237.88875pt>
+File: ./Figs/GameBoard.pdf Graphic file (type pdf)
+
+<use ./Figs/GameBoard.pdf>
+Package pdftex.def Info: ./Figs/GameBoard.pdf used on input line 210.
 (pdftex.def)             Requested size: 198.60075pt x 184.58328pt.
 
-No file DOTA_report.bbl.
+Underfull \hbox (badness 10000) in paragraph at lines 220--227
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 220--227
+
+ []
+
 [1{/usr/local/texlive/2015/texmf-var/fonts/map/pdftex/updmap/pdftex.map}
 
- <./GameBoard.pdf>] (./DOTA_report.aux) ) 
+ <./Figs/GameBoard.pdf>]
+LaTeX Font Info:    Try loading font information for OMS+cmr on input line 244.
+
+ (/usr/local/texlive/2015/texmf-dist/tex/latex/base/omscmr.fd
+File: omscmr.fd 2014/09/29 v2.5h Standard LaTeX font definitions
+)
+LaTeX Font Info:    Font shape `OMS/cmr/m/n' in size <9> not available
+(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 244.
+
+Underfull \hbox (badness 10000) in paragraph at lines 241--248
+
+ []
+
+
+Overfull \hbox (36.42702pt too wide) in paragraph at lines 241--248
+\OMS/cmsy/m/n/9 f\OT1/cmr/m/n/9 ``tick":24516,``time":825,``type":``DT[]DOTA[]U
+nit[]Hero[]Omniknight",
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 241--248
+
+ []
+
+
+
+ C A R E F U L !! \begin{figure}[h] used on this page !
+
+
+<./Figs/XP_example.pdf, id=24, 505.89pt x 505.89pt>
+File: ./Figs/XP_example.pdf Graphic file (type pdf)
+
+<use ./Figs/XP_example.pdf>
+Package pdftex.def Info: ./Figs/XP_example.pdf used on input line 251.
+(pdftex.def)             Requested size: 198.60075pt x 198.60085pt.
+
+No file DOTA_report.bbl.
+[2 <./Figs/XP_example.pdf>] (./DOTA_report.aux)
+
+LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
+
+ ) 
 Here is how much of TeX's memory you used:
- 3430 strings out of 493089
- 43806 string characters out of 6134842
- 118687 words of memory out of 5000000
- 6872 multiletter control sequences out of 15000+600000
- 13423 words of font info for 49 fonts, out of 8000000 for 9000
+ 3460 strings out of 493089
+ 44343 string characters out of 6134842
+ 126664 words of memory out of 5000000
+ 6896 multiletter control sequences out of 15000+600000
+ 13731 words of font info for 50 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 49i,10n,37p,330b,231s stack positions out of 5000i,500n,10000p,200000b,80000s
-</usr/local/texlive/2015/texmf-dist/fo
-nts/type1/public/amsfonts/cm/cmr9.pfb></usr/local/texlive/2015/texmf-dist/fonts
-/type1/public/amsfonts/cm/cmss10.pfb></usr/local/texlive/2015/texmf-dist/fonts/
-type1/public/amsfonts/cm/cmssbx10.pfb></usr/local/texlive/2015/texmf-dist/fonts
-/type1/public/amsfonts/cm/cmssi10.pfb></usr/local/texlive/2015/texmf-dist/fonts
-/type1/public/amsfonts/cm/cmsy5.pfb></usr/local/texlive/2015/texmf-dist/fonts/t
-ype1/public/amsfonts/cm/cmsy6.pfb></usr/local/texlive/2015/texmf-dist/fonts/typ
-e1/public/amsfonts/cm/cmsy9.pfb></usr/local/texlive/2015/texmf-dist/fonts/type1
-/public/amsfonts/latxfont/lcircle1.pfb>
-Output written on DOTA_report.pdf (1 page, 198765 bytes).
+ 49i,10n,37p,1300b,239s stack positions out of 5000i,500n,10000p,200000b,80000s
+</usr/local/texlive/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx9.pfb>
+</usr/local/texlive/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmr9.pfb></u
+sr/local/texlive/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmss10.pfb></us
+r/local/texlive/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmssbx10.pfb></u
+sr/local/texlive/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmssi10.pfb></u
+sr/local/texlive/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy5.pfb></usr
+/local/texlive/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy6.pfb></usr/l
+ocal/texlive/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy9.pfb></usr/loc
+al/texlive/2015/texmf-dist/fonts/type1/public/amsfonts/latxfont/lcircle1.pfb>
+Output written on DOTA_report.pdf (2 pages, 505948 bytes).
 PDF statistics:
- 50 PDF objects out of 1000 (max. 8388607)
- 35 compressed objects within 1 object stream
+ 63 PDF objects out of 1000 (max. 8388607)
+ 44 compressed objects within 1 object stream
  0 named destinations out of 1000 (max. 500000)
- 6 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 11 words of extra memory for PDF output out of 10000 (max. 10000000)
 

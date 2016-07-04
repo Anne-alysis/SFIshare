@@ -203,7 +203,7 @@ Existing performance metrics of cyber intrusion detection algorithms, such as fa
 An aerial view of the DOTA game board is shown in Fig.~\ref{gameboard}.  The goal of the game is to destroy the opposing team's base, their Ancient, located either in the lower left or upper right corner of the figure.  
 
 \begin{figure}[h]
-\centerline{\includegraphics[width=0.8\linewidth]{GameBoard.pdf}}
+\centerline{\includegraphics[width=0.8\linewidth]{./Figs/GameBoard.pdf}}
 \caption{Game board of DOTA 2.}\label{gameboard}
 \end{figure}
 
@@ -241,6 +241,17 @@ The raw game data is initially downloaded from a DOTA 2 repository in a binary f
 \\
 \\
 where `tick' is a subunit of `time', and team indicates 2 or 3 (which must be connected with Dire or Radiant, see below).  The type of event includes position, items, abilities, gold, XP, damage, healing, and death, with each type triggering different tags following the type.  This event-by-event data, which can include multiple events per time step, was transformed into a single time step which keeps track of all events occurring at that step for each hero on each team.  Aggregated statistics for the game a whole, such as which team won and draft order, was folded in with this event data.  The draft order from the aggregated statistics allows the hero names and team number (2 or 3) to be correlated with each team, Dire or Radiant, as the Radiant are denoted as team 0 in the draft.  This is important as the win is denoted as a boolean value for if the Radiant team won or lost, not if team 2 or 3 won or lost.  
+
+
+\begin{figure}[h]
+\centerline{\includegraphics[width=0.8\linewidth]{./Figs/XP_example.pdf}}
+\caption{Game board of DOTA 2.}\label{gameboard}
+\end{figure}
+
+
+
+
+
 
 \subsection{Between Games (Marla)}
 
