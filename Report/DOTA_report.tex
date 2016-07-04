@@ -108,8 +108,8 @@
 
 %% For PNAS Only:
 \contributor{Submitted to Proceedings of the National Academy of Sciences of the United States of America}
-\url{www.pnas.org/cgi/doi/10.1073/pnas.0709640104}
-\copyrightyear{2008}
+\url{www.pnas.org/cgi/doi/xxx}
+\copyrightyear{x}
 \issuedate{Issue Date}
 \volume{Volume}
 \issuenumber{Issue Number}
@@ -233,6 +233,14 @@ where B indicates a ban, P indicates a pick, and the number refers to the team.
 
 
 \subsection{Within Game (Anne)}
+
+The raw game data is initially downloaded from a DOTA 2 repository in a binary form.  A java parser was written to convert the data into a JSON format, with each event occurring in the game generating an output.  An example for a hero movement event is shown below:
+\\
+\\
+\{``tick":24516,``time":825,``type":``DT\_DOTA\_Unit\_Hero\_Omniknight", ``team":3,``x":99,``y":171\}
+\\
+\\
+where `tick' is a subunit of `time', and team indicates 2 or 3 (which must be connected with Dire or Radiant, see below).  The type of event includes position, items, abilities, gold, XP, damage, healing, and death, with each type triggering different tags following the type.  This event-by-event data, which can include multiple events per time step, was transformed into a single time step which keeps track of all events occurring at that step for each hero on each team.  Aggregated statistics for the game a whole, such as which team won and draft order, was folded in with this event data.  The draft order from the aggregated statistics allows the hero names and team number (2 or 3) to be correlated with each team, Dire or Radiant, as the Radiant are denoted as team 0 in the draft.  This is important as the win is denoted as a boolean value for if the Radiant team won or lost, not if team 2 or 3 won or lost.  
 
 \subsection{Between Games (Marla)}
 
