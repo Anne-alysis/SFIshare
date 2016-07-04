@@ -196,28 +196,45 @@ x\end{abstract}
 
 \section{Introduction}
 
-Existing performance metrics of cyber intrusion detection algorithms, such as false positive or negative rates, are unable to capture the level of granularity necessary to significantly improve the algorithms, especially when a single, definitive outcome is rarely the case for this domain.  Traditional static cyber defense systems also require long lead times to install patch updates, and staving off damage in real time is unfeasible using these metrics.  Therefore, metrics must evolve to provide real-time evaluations of adaptive adversaries whose strategies may change depending on the protective mechanisms they encounter, as well as characterizing sequences of detections.  Usable data from within the cyber domain that may help to strengthen detection algorithm scoring is nearly nonexistent.  If actual attacks are documented in the real world, this data is rarely made available and may be network specific (hence, not generalizable).   Thus, a proxy for the data is necessary.  An online battle arena video game called Defense of the Ancients 2 (DOTA 2) is a rich data source of real-time adaptive adversaries.  DOTA 2 is a strategic, competitive, multiplayer game where two teams of five individuals each compete against each other to complete objectives and to destroy the other team?s base in a time frame of $\sim$ 20 to $\sim$ 90 minutes.  The players deploy various in-game and between-game tactics and procedures to achieve a specific measurable objective.  Professional players vie for tens of millions of dollars in prize pools each year, and over 2 billion games have been played.  The results in this paper are using data from a cache of 500 GB of aggregated game data ($\sim$ 2.5 million games played over one year) and from X GB of raw, event-by-event data.  Our goal is to use this data to shed light on how we can 1) detect and 2) quantify the rate of change of strategies in co-evolutionary systems.  This is akin to the classic ?Red Queen hypothesis? in evolutionary biology, but in this case we are interested in human behaviors where a strategy can be considered most generally as a ?meme? of sorts.  Our hypotheses include: 1) a mapping exists between game observables and a set of strategies, 2) a measurable signal can be extracted from which to ascertain the adoption, stabilization, and decay of specific strategy traits, 3) changes in strategies occur over time, and 4) strategy changes are driven (at least in part) from behaviors of the opposing team.  We postulate that testing these hypotheses will require an understanding of the co-evolutionary dynamics of the overall environment.  In particular, the human behavioral components underlying the adversary/defense team actions will need to be assessed.  The use of data from a multiplayer online game for this purpose assumes there is a valid mapping between the ?game-space? to ?cyber-space? behaviors from which useful inferences can be made.  Through this exercise we hope to understand what types of data (if any) are useful for this purpose and how one might develop proxies to characterize strategies.  Ultimately, we hope that the analysis could be applied against realistic data specific to a cyber intrusion.  
+Existing performance metrics of cyber intrusion detection algorithms, such as false positive or negative rates, are unable to capture the level of granularity necessary to significantly improve the algorithms, especially when a single, definitive outcome is rarely the case for this domain.  Traditional static cyber defense systems also require long lead times to install patch updates, and staving off damage in real time is unfeasible using these metrics.  Therefore, metrics must evolve to provide real-time evaluations of adaptive adversaries whose strategies may change depending on the protective mechanisms they encounter, as well as characterizing sequences of detections.  Usable data from within the cyber domain that may help to strengthen detection algorithm scoring is nearly nonexistent.  If actual attacks are documented in the real world, this data is rarely made available and may be network specific (hence, not generalizable).   Thus, a proxy for the data is necessary.  An online battle arena video game called Defense of the Ancients 2 (DOTA 2) is a rich data source of real-time adaptive adversaries.  DOTA 2 is a strategic, competitive, multiplayer game where two teams of five individuals each compete against each other to complete objectives and to destroy the other team?s base in a time frame of $\sim$ 20 to $\sim$ 90 minutes.  The players deploy various in-game and between-game tactics and procedures to achieve a specific measurable objective.  Professional players vie for tens of millions of dollars in prize pools each year, and over 2 billion games have been played.  The results in this paper are using data from a cache of 500 GB of aggregated game data ($\sim$ 2.5 million games played over one year) and from X GB of raw, event-by-event data.  Our goal is to use this data to shed light on how we can 1) detect and 2) quantify the rate of change of strategies in co-evolutionary systems.  This is akin to the classic `Red Queen hypothesis' in evolutionary biology, but in this case we are interested in human behaviors where a strategy can be considered most generally as a `meme' of sorts.  Our hypotheses include: 1) a mapping exists between game observables and a set of strategies, 2) a measurable signal can be extracted from which to ascertain the adoption, stabilization, and decay of specific strategy traits, 3) changes in strategies occur over time, and 4) strategy changes are driven (at least in part) from behaviors of the opposing team.  We postulate that testing these hypotheses will require an understanding of the co-evolutionary dynamics of the overall environment.  In particular, the human behavioral components underlying the adversary/defense team actions will need to be assessed.  The use of data from a multiplayer online game for this purpose assumes there is a valid mapping between the `game-space' to `cyber-space' behaviors from which useful inferences can be made.  Through this exercise we hope to understand what types of data (if any) are useful for this purpose and how one might develop proxies to characterize strategies.  Ultimately, we hope that the analysis could be applied against realistic data specific to a cyber intrusion.  
 
 \section{The Game: DOTA 2}
 
-
+An aerial view of the DOTA game board is shown in Fig.~\ref{gameboard}.  The goal of the game is to destroy the opposing team's base, their Ancient, located either in the lower left or upper right corner of the figure.  
 
 \begin{figure}[h]
 \centerline{\includegraphics[width=0.8\linewidth]{GameBoard.pdf}}
-\caption{Figure caption}\label{placeholder}
+\caption{Game board of DOTA 2.}\label{gameboard}
 \end{figure}
 
+Ten human players are divided into two teams of five (the Dire and the Radiant teams), each controlling a `hero' character, which is chosen via a drafting process in professional games (discussed in more detail in the following section).  Each hero has its own set of unique abilities and is generally divided into one of three categories: intelligence, strength, or agility.  Throughout the game, the heroes amass 1) experience (XP) in order to become more powerful and unlock special abilities and 2) gold in order to buy items which also increase power.  
 
-\section{Draft}
+There are three main `lanes' to reach each Ancient, along the outer edges and down the diagonal.  There is also a jungle landscape between the lanes.  Various computer-controlled characters called `creeps' are deployed throughout the game which allow heroes to gain experience.  Defensive towers also line the lanes and protect the Ancient against enemy heroes.  
 
-\subsection{Salva} 
+\subsection{The Draft}
 
-\subsection{Dan}
+Heroes are chosen from a pool of $\sim$ 120 characters.  In professional games, there are twenty choices for ten human players, five hero picks and five hero bans for each team, chosen in the following order:
+\\
+\\
+B1 B2 B1 B2 P1 P2 P2 P1 B1 B2 B1 B2 P2 P1 P2 P1 B2 B1 P2 P1
+\\
+\\
+where B indicates a ban, P indicates a pick, and the number refers to the team.  
 
 
-\section{Within Game (Anne)}
 
-\section{Between Games (Marla)}
+\section{Analysis and Results}
+
+\subsection{Draft}
+
+\subsubsection{Salva} 
+
+\subsubsection{Dan}
+
+
+\subsection{Within Game (Anne)}
+
+\subsection{Between Games (Marla)}
 
 
 %----------------------------------------------------------------------------------------
