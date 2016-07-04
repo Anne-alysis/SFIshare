@@ -107,7 +107,7 @@
 %------------------------------------------------
 
 %% For PNAS Only:
-\contributor{Submitted to Proceedings of the National Academy of Sciences of the United States of America}
+\contributor{Future Submission to Proceedings of the National Academy of Sciences of the United States of America}
 \url{www.pnas.org/cgi/doi/xxx}
 \copyrightyear{x}
 \issuedate{Issue Date}
@@ -122,7 +122,7 @@
 %	TITLE AND AUTHORS
 %----------------------------------------------------------------------------------------
 
-\title{DOTA} % For titles, only capitalize the first letter
+\title{Evolution of strategic decision making: DOTA 2 as a proxy for cybersecurity environments} % For titles, only capitalize the first letter
 
 %------------------------------------------------
 
@@ -170,11 +170,16 @@ of the United States of America}
 %----------------------------------------------------------------------------------------
 
 \begin{abstract}
-x\end{abstract}
+Computer hackers use certain strategies to penetrate systems.  These strategies evolve over time, usually in response to the defense mechanisms employed by the system administrators.  Being able to identify the strategies and when they change is of paramount importance to ensure the safety of the systems.  Because data to help this effort is scarce, this paper explores the possibility of using competitive, strategic video game data as a proxy to identify strategies and their change points.  
+
+
+
+
+\end{abstract}
 
 %------------------------------------------------
 
-\keywords{Keyword1 | Keyword2 | Keyword3} % When adding keywords, separate each term with a straight line: |
+\keywords{Cybersecurity | Intrusion detection algorithms | adaptive strategies | video game data} % When adding keywords, separate each term with a straight line: |
 
 %------------------------------------------------
 
@@ -203,7 +208,7 @@ Existing performance metrics of cyber intrusion detection algorithms, such as fa
 An aerial view of the DOTA game board is shown in Fig.~\ref{gameboard}.  The goal of the game is to destroy the opposing team's base, their Ancient, located either in the lower left or upper right corner of the figure.  
 
 \begin{figure}[h]
-\centerline{\includegraphics[width=1.3\linewidth]{./Figs/GameBoard.pdf}}
+\centerline{\includegraphics[width=.9\linewidth]{./Figs/GameBoard.pdf}}
 \caption{Game board of DOTA 2.}\label{gameboard}
 \end{figure}
 
@@ -289,8 +294,15 @@ The model that produces the hidden states for the Radiant is shown in Fig.~\ref{
 \caption{Hidden Markov model for one team of the sample game.}\label{model}
 \end{figure}
 
+Future work will involve unsupervised learning in order to extract the states, using distances within each team (as is done deterministically above), distances among all players, and adding additional features in addition to distances such as XP or gold.  
+
 
 \subsection{Between Games (Marla)}
+
+
+\section{Conclusions}
+
+X
 
 
 %----------------------------------------------------------------------------------------

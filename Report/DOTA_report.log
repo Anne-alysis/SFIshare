@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.16 (TeX Live 2015) (preloaded format=pdflatex 2015.5.24)  4 JUL 2016 13:07
+This is pdfTeX, Version 3.14159265-2.6-1.40.16 (TeX Live 2015) (preloaded format=pdflatex 2015.5.24)  4 JUL 2016 13:20
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -345,35 +345,34 @@ File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 File: ./Figs/GameBoard.pdf Graphic file (type pdf)
 
 <use ./Figs/GameBoard.pdf>
-Package pdftex.def Info: ./Figs/GameBoard.pdf used on input line 210.
-(pdftex.def)             Requested size: 322.72575pt x 299.96281pt.
-
-Underfull \hbox (badness 10000) in paragraph at lines 220--227
-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 220--227
-
- []
-
-[1{/usr/local/texlive/2015/texmf-var/fonts/map/pdftex/updmap/pdftex.map}
+Package pdftex.def Info: ./Figs/GameBoard.pdf used on input line 215.
+(pdftex.def)             Requested size: 223.42348pt x 207.6512pt.
+ [1{/usr/local/texlive/2015/texmf-var/fonts/map/pdftex/updmap/pdftex.map}
 
  <./Figs/GameBoard.pdf>]
-LaTeX Font Info:    Try loading font information for OMS+cmr on input line 248.
+Underfull \hbox (badness 10000) in paragraph at lines 225--232
 
- (/usr/local/texlive/2015/texmf-dist/tex/latex/base/omscmr.fd
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 225--232
+
+ []
+
+LaTeX Font Info:    Try loading font information for OMS+cmr on input line 253.
+
+(/usr/local/texlive/2015/texmf-dist/tex/latex/base/omscmr.fd
 File: omscmr.fd 2014/09/29 v2.5h Standard LaTeX font definitions
 )
 LaTeX Font Info:    Font shape `OMS/cmr/m/n' in size <9> not available
-(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 248.
+(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 253.
 
-Underfull \hbox (badness 10000) in paragraph at lines 245--252
+Underfull \hbox (badness 10000) in paragraph at lines 250--257
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 245--252
+Underfull \hbox (badness 10000) in paragraph at lines 250--257
 
  []
 
@@ -386,10 +385,10 @@ Underfull \hbox (badness 10000) in paragraph at lines 245--252
 File: ./Figs/XP_example.pdf Graphic file (type pdf)
 
 <use ./Figs/XP_example.pdf>
-Package pdftex.def Info: ./Figs/XP_example.pdf used on input line 256.
+Package pdftex.def Info: ./Figs/XP_example.pdf used on input line 261.
 (pdftex.def)             Requested size: 198.60075pt x 198.60085pt.
 LaTeX Font Info:    Font shape `OMS/cmr/m/n' in size <8> not available
-(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 269.
+(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 274.
 
 
 
@@ -401,7 +400,7 @@ File: ./Figs/HiddenStatesVsObserved.pdf Graphic file (type pdf)
 
 <use ./Figs/HiddenStatesVsObserved.pdf>
 Package pdftex.def Info: ./Figs/HiddenStatesVsObserved.pdf used on input line 2
-83.
+88.
 (pdftex.def)             Requested size: 198.60075pt x 193.59573pt.
  [2 <./Figs/XP_example.pdf>]
 
@@ -412,7 +411,7 @@ Package pdftex.def Info: ./Figs/HiddenStatesVsObserved.pdf used on input line 2
 <./Figs/Model.pdf, id=36, 505.89pt x 505.89pt>
 File: ./Figs/Model.pdf Graphic file (type pdf)
  <use ./Figs/Model.pdf>
-Package pdftex.def Info: ./Figs/Model.pdf used on input line 292.
+Package pdftex.def Info: ./Figs/Model.pdf used on input line 297.
 (pdftex.def)             Requested size: 198.60075pt x 198.60085pt.
 
 No file DOTA_report.bbl.
@@ -421,7 +420,7 @@ No file DOTA_report.bbl.
 Here is how much of TeX's memory you used:
  3478 strings out of 493089
  44681 string characters out of 6134842
- 126688 words of memory out of 5000000
+ 126696 words of memory out of 5000000
  6910 multiletter control sequences out of 15000+600000
  13987 words of font info for 51 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
@@ -436,7 +435,7 @@ local/texlive/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy6.pfb></usr/lo
 cal/texlive/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy8.pfb></usr/loca
 l/texlive/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy9.pfb></usr/local/
 texlive/2015/texmf-dist/fonts/type1/public/amsfonts/latxfont/lcircle1.pfb>
-Output written on DOTA_report.pdf (3 pages, 973417 bytes).
+Output written on DOTA_report.pdf (3 pages, 974251 bytes).
 PDF statistics:
  93 PDF objects out of 1000 (max. 8388607)
  66 compressed objects within 1 object stream
