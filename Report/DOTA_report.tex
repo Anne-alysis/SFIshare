@@ -203,7 +203,7 @@ Existing performance metrics of cyber intrusion detection algorithms, such as fa
 An aerial view of the DOTA game board is shown in Fig.~\ref{gameboard}.  The goal of the game is to destroy the opposing team's base, their Ancient, located either in the lower left or upper right corner of the figure.  
 
 \begin{figure}[h]
-\centerline{\includegraphics[width=0.8\linewidth]{./Figs/GameBoard.pdf}}
+\centerline{\includegraphics[width=1.3\linewidth]{./Figs/GameBoard.pdf}}
 \caption{Game board of DOTA 2.}\label{gameboard}
 \end{figure}
 
@@ -234,23 +234,60 @@ where B indicates a ban, P indicates a pick, and the number refers to the team.
 
 \subsection{Within Game (Anne)}
 
-The raw game data is initially downloaded from a DOTA 2 repository in a binary form.  A java parser was written to convert the data into a JSON format, with each event occurring in the game generating an output.  An example for a hero movement event is shown below:
+Data from throughout each game was extracted and analyzed in order to determine underlying strategies.  A hidden Markov model was used and is discussed below after an overview of the data processing.  
+
+\subsubsection{Data}
+
+The raw game data was initially downloaded from a DOTA 2 repository in a binary form.  A java parser was written to convert the data into a JSON format, with each event occurring in the game generating an output.  An example for a hero movement event is shown below:
 \\
 \\
-\{``tick":24516,``time":825,``type":``DT\_DOTA\_Unit\_Hero\_Omniknight", ``team":3,``x":99,``y":171\}
+\{``tick":24516,``time":825,``type":``DT\_DOTA\_Unit\_Hero\_X",\\ ``team":3,``x":99,``y":171\}
 \\
 \\
-where `tick' is a subunit of `time', and team indicates 2 or 3 (which must be connected with Dire or Radiant, see below).  The type of event includes position, items, abilities, gold, XP, damage, healing, and death, with each type triggering different tags following the type.  This event-by-event data, which can include multiple events per time step, was transformed into a single time step which keeps track of all events occurring at that step for each hero on each team.  Aggregated statistics for the game a whole, such as which team won and draft order, was folded in with this event data.  The draft order from the aggregated statistics allows the hero names and team number (2 or 3) to be correlated with each team, Dire or Radiant, as the Radiant are denoted as team 0 in the draft.  This is important as the win is denoted as a boolean value for if the Radiant team won or lost, not if team 2 or 3 won or lost.  
+where `tick' is a subunit of `time', and team indicates 2 or 3 (which must be connected with Dire or Radiant, see below).  The type of event includes position, items, abilities, gold, XP, damage, healing, and death, with each type triggering different tags following the type.  This event-by-event data, which can include multiple events per time step, was transformed into a single time step which keeps track of all events occurring at that step for each hero on each team.  Aggregated statistics for the game a whole, such as which team won and draft order, was folded in with this event data.  The draft order from the aggregated statistics allows the hero names and team number (2 or 3) to be correlated with each team, Dire or Radiant, as the Radiant are denoted as team 0 in the draft.  This is important as the win is denoted as a boolean value for if the Radiant team won or lost, not if team 2 or 3 won or lost.  Figure~\ref{xp} shows an example of the time evolution of one game metric, XP.  This was a fairly unbalanced, fast game in which the Dire team won. 
+
 
 
 \begin{figure}[h]
 \centerline{\includegraphics[width=0.8\linewidth]{./Figs/XP_example.pdf}}
-\caption{Game board of DOTA 2.}\label{gameboard}
+\caption{Evolution of experience points, XP, throughout a sample game for each team and hero.}\label{xp}
 \end{figure}
 
 
+\subsubsection{Model}
 
 
+A hidden Markov model (HMM) was used to explore the latent strategies with DOTA games.  The observed signals were assumed to be observables from the game itself, and the hidden signal was assumed to be the desired strategy. One of the most relevant and revealing observables in the game are the positions of the players.  Fighting is highly correlated with distance, as if two opposing heroes are nearby each other, the probability they will fight is high in order to win the game.  Experience is also accumulated through fighting, and hence, is correlated with distance.  
+
+One method to convert absolute distances of each player into observable states is to coarse grain by relative distance among heroes on a given team.  The states were defined as follows, where the number indicates the number of heroes that are considered ``close" together in a cluster:
+
+\begin{itemize}
+\item 1-1-1-1-1
+\item 1-1-1-2
+\item 1-1-3
+\item 1-2-2
+\item 2-3
+\item 1-4
+\item 5
+\end{itemize}
+
+For example, the state ``1-1-1-1-1" indicates all heroes are far apart, whereas ``5" denotes heroes are clustered closely together.  ``Closeness" is defined by a relative distance threshold:  if the relative distance between hero A and hero B is below the set threshold, then A and B are considered ``close".  This threshold was set to be 5 units, with the range of the game board being $\sim$ 100 units $\times$ $\sim$ 100 units.  Sensitivity on the hidden states on this threshold was tested and found to be XXXXX.  
+
+
+
+\begin{figure}[h]
+\centerline{\includegraphics[width=0.8\linewidth]{./Figs/HiddenStatesVsObserved}}
+\caption{Evolution of hidden and observed states for a sample game. Note, the hidden state X may not correspond directly to the observed state X.  These numerical labels are arbitrary and used only for plotting purposes.}\label{states}
+\end{figure}
+
+The time series of states for a sample game is shown in Fig.~\ref{states}.  For each time step in the game, an observed state was assigned to each team.  This sequence served as an input to the HMM.  The code to estimate the model parameters and the most likely hidden state sequence was provided by Simon DeDeo (http://tuvalu.santafe.edu/$\sim$simon/styled-8/).  The code uses the Akaike information criterion (AIC) in order to estimate the number of hidden states in the model.  For the example game above, the number of hidden states for the Dire team was 13 and 11 for the Radiant, as compared to seven observable states.   
+
+The model that produces the hidden states for the Radiant is shown in Fig.~\ref{model}.
+
+\begin{figure}[h]
+\centerline{\includegraphics[width=0.8\linewidth]{./Figs/Model.pdf}}
+\caption{Hidden Markov model for one team of the sample game.}\label{model}
+\end{figure}
 
 
 \subsection{Between Games (Marla)}
