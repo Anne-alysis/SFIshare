@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.16 (TeX Live 2015) (preloaded format=pdflatex 2015.5.24)  4 JUL 2016 13:20
+This is pdfTeX, Version 3.14159265-2.6-1.40.16 (TeX Live 2015) (preloaded format=pdflatex 2015.5.24)  6 JUL 2016 21:47
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -341,15 +341,15 @@ File: umsb.fd 2013/01/14 v3.01 AMS symbols B
  
  ======================================================================== 
 
-<./Figs/GameBoard.pdf, id=1, 255.95625pt x 237.88875pt>
-File: ./Figs/GameBoard.pdf Graphic file (type pdf)
+<./Figs/GameBoard.png, id=1, 351.3125pt x 351.3125pt>
+File: ./Figs/GameBoard.png Graphic file (type png)
 
-<use ./Figs/GameBoard.pdf>
-Package pdftex.def Info: ./Figs/GameBoard.pdf used on input line 215.
-(pdftex.def)             Requested size: 223.42348pt x 207.6512pt.
+<use ./Figs/GameBoard.png>
+Package pdftex.def Info: ./Figs/GameBoard.png used on input line 215.
+(pdftex.def)             Requested size: 198.60075pt x 198.60449pt.
  [1{/usr/local/texlive/2015/texmf-var/fonts/map/pdftex/updmap/pdftex.map}
 
- <./Figs/GameBoard.pdf>]
+ <./Figs/GameBoard.png (PNG copy)>]
 Underfull \hbox (badness 10000) in paragraph at lines 225--232
 
  []
@@ -359,20 +359,46 @@ Underfull \hbox (badness 10000) in paragraph at lines 225--232
 
  []
 
-LaTeX Font Info:    Try loading font information for OMS+cmr on input line 253.
+
+
+ C A R E F U L !! \begin{figure}[h] used on this page !
+
+
+<./Figs/hero_usage_across_patches.pdf, id=15, 536.0025pt x 508.90125pt>
+File: ./Figs/hero_usage_across_patches.pdf Graphic file (type pdf)
+
+<use ./Figs/hero_usage_across_patches.pdf>
+Package pdftex.def Info: ./Figs/hero_usage_across_patches.pdf used on input lin
+e 245.
+(pdftex.def)             Requested size: 223.42348pt x 212.1219pt.
+
+
+
+ C A R E F U L !! \begin{figure}[h] used on this page !
+
+
+<./Figs/landscape.pdf, id=16, 417.56pt x 493.845pt>
+File: ./Figs/landscape.pdf Graphic file (type pdf)
+ <use ./Figs/landscape.pdf>
+Package pdftex.def Info: ./Figs/landscape.pdf used on input line 256.
+(pdftex.def)             Requested size: 186.1875pt x 220.20868pt.
+
+[2 <./Figs/hero_usage_across_patches.pdf>]
+LaTeX Font Info:    Try loading font information for OMS+cmr on input line 289.
+
 
 (/usr/local/texlive/2015/texmf-dist/tex/latex/base/omscmr.fd
 File: omscmr.fd 2014/09/29 v2.5h Standard LaTeX font definitions
 )
 LaTeX Font Info:    Font shape `OMS/cmr/m/n' in size <9> not available
-(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 253.
+(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 289.
 
-Underfull \hbox (badness 10000) in paragraph at lines 250--257
+Underfull \hbox (badness 10000) in paragraph at lines 286--293
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 250--257
+Underfull \hbox (badness 10000) in paragraph at lines 286--293
 
  []
 
@@ -381,64 +407,76 @@ Underfull \hbox (badness 10000) in paragraph at lines 250--257
  C A R E F U L !! \begin{figure}[h] used on this page !
 
 
-<./Figs/XP_example.pdf, id=24, 505.89pt x 505.89pt>
+<./Figs/XP_example.pdf, id=155, 505.89pt x 505.89pt>
 File: ./Figs/XP_example.pdf Graphic file (type pdf)
 
 <use ./Figs/XP_example.pdf>
-Package pdftex.def Info: ./Figs/XP_example.pdf used on input line 261.
+Package pdftex.def Info: ./Figs/XP_example.pdf used on input line 297.
 (pdftex.def)             Requested size: 198.60075pt x 198.60085pt.
 LaTeX Font Info:    Font shape `OMS/cmr/m/n' in size <8> not available
-(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 274.
-
+(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 310.
+ [3 <./Figs/landscape.pdf> <./Figs/XP_example.pdf>]
 
 
  C A R E F U L !! \begin{figure}[h] used on this page !
 
 
-<./Figs/HiddenStatesVsObserved.pdf, id=25, 483.40138pt x 471.21716pt>
+<./Figs/HiddenStatesVsObserved.pdf, id=203, 483.40138pt x 471.21716pt>
 File: ./Figs/HiddenStatesVsObserved.pdf Graphic file (type pdf)
 
 <use ./Figs/HiddenStatesVsObserved.pdf>
-Package pdftex.def Info: ./Figs/HiddenStatesVsObserved.pdf used on input line 2
-88.
+Package pdftex.def Info: ./Figs/HiddenStatesVsObserved.pdf used on input line 3
+24.
 (pdftex.def)             Requested size: 198.60075pt x 193.59573pt.
- [2 <./Figs/XP_example.pdf>]
+
 
 
  C A R E F U L !! \begin{figure}[h] used on this page !
 
 
-<./Figs/Model.pdf, id=36, 505.89pt x 505.89pt>
+<./Figs/Model.pdf, id=204, 505.89pt x 505.89pt>
 File: ./Figs/Model.pdf Graphic file (type pdf)
  <use ./Figs/Model.pdf>
-Package pdftex.def Info: ./Figs/Model.pdf used on input line 297.
+Package pdftex.def Info: ./Figs/Model.pdf used on input line 333.
 (pdftex.def)             Requested size: 198.60075pt x 198.60085pt.
 
-No file DOTA_report.bbl.
-[3 <./Figs/HiddenStatesVsObserved.pdf> <./Figs/Model.pdf>] (./DOTA_report.aux) 
-) 
+(./DOTA_report.bbl
+
+LaTeX Warning: Empty `thebibliography' environment on input line 3.
+
+) [4 <./Figs/HiddenStatesVsObserved.pdf> <./Figs/Model.pdf>] (./DOTA_report.aux
+) ) 
 Here is how much of TeX's memory you used:
- 3478 strings out of 493089
- 44681 string characters out of 6134842
- 126696 words of memory out of 5000000
- 6910 multiletter control sequences out of 15000+600000
- 13987 words of font info for 51 fonts, out of 8000000 for 9000
+ 3508 strings out of 493089
+ 45242 string characters out of 6134842
+ 125727 words of memory out of 5000000
+ 6932 multiletter control sequences out of 15000+600000
+ 15929 words of font info for 58 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 49i,10n,37p,1300b,246s stack positions out of 5000i,500n,10000p,200000b,80000s
-</usr/local/texlive/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx9.pfb><
-/usr/local/texlive/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmr9.pfb></us
-r/local/texlive/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmss10.pfb></usr
-/local/texlive/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmssbx10.pfb></us
-r/local/texlive/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmssi10.pfb></us
-r/local/texlive/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy5.pfb></usr/
-local/texlive/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy6.pfb></usr/lo
-cal/texlive/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy8.pfb></usr/loca
-l/texlive/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy9.pfb></usr/local/
-texlive/2015/texmf-dist/fonts/type1/public/amsfonts/latxfont/lcircle1.pfb>
-Output written on DOTA_report.pdf (3 pages, 974251 bytes).
+ 49i,10n,37p,1300b,296s stack positions out of 5000i,500n,10000p,200000b,80000s
+</usr/local/texlive/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx8.pfb
+></usr/local/texlive/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx9.pfb><
+/usr/local/texlive/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></
+usr/local/texlive/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi8.pfb></us
+r/local/texlive/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi9.pfb></usr/
+local/texlive/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr/lo
+cal/texlive/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmr6.pfb></usr/local
+/texlive/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmr7.pfb></usr/local/te
+xlive/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmr9.pfb></usr/local/texli
+ve/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmss10.pfb></usr/local/texliv
+e/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmssbx10.pfb></usr/local/texli
+ve/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmssi10.pfb></usr/local/texli
+ve/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/local/texliv
+e/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy5.pfb></usr/local/texlive/
+2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy6.pfb></usr/local/texlive/20
+15/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy8.pfb></usr/local/texlive/2015
+/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy9.pfb></usr/local/texlive/2015/t
+exmf-dist/fonts/type1/public/amsfonts/cm/cmti9.pfb></usr/local/texlive/2015/tex
+mf-dist/fonts/type1/public/amsfonts/latxfont/lcircle1.pfb>
+Output written on DOTA_report.pdf (4 pages, 1525675 bytes).
 PDF statistics:
- 93 PDF objects out of 1000 (max. 8388607)
- 66 compressed objects within 1 object stream
+ 282 PDF objects out of 1000 (max. 8388607)
+ 226 compressed objects within 3 object streams
  0 named destinations out of 1000 (max. 500000)
- 21 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 31 words of extra memory for PDF output out of 10000 (max. 10000000)
 

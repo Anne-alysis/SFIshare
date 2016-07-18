@@ -122,7 +122,7 @@
 %	TITLE AND AUTHORS
 %----------------------------------------------------------------------------------------
 
-\title{Evolution of strategic decision making: DOTA 2 as a proxy for cybersecurity environments} % For titles, only capitalize the first letter
+\title{Co-evolution of strategic decision making: DOTA 2 as a proxy for cybersecurity environments} % For titles, only capitalize the first letter
 
 %------------------------------------------------
 
@@ -201,14 +201,18 @@ Computer hackers use certain strategies to penetrate systems.  These strategies 
 
 \section{Introduction}
 
-Existing performance metrics of cyber intrusion detection algorithms, such as false positive or negative rates, are unable to capture the level of granularity necessary to significantly improve the algorithms, especially when a single, definitive outcome is rarely the case for this domain.  Traditional static cyber defense systems also require long lead times to install patch updates, and staving off damage in real time is unfeasible using these metrics.  Therefore, metrics must evolve to provide real-time evaluations of adaptive adversaries whose strategies may change depending on the protective mechanisms they encounter, as well as characterizing sequences of detections.  Usable data from within the cyber domain that may help to strengthen detection algorithm scoring is nearly nonexistent.  If actual attacks are documented in the real world, this data is rarely made available and may be network specific (hence, not generalizable).   Thus, a proxy for the data is necessary.  An online battle arena video game called Defense of the Ancients 2 (DOTA 2) is a rich data source of real-time adaptive adversaries.  DOTA 2 is a strategic, competitive, multiplayer game where two teams of five individuals each compete against each other to complete objectives and to destroy the other team?s base in a time frame of $\sim$ 20 to $\sim$ 90 minutes.  The players deploy various in-game and between-game tactics and procedures to achieve a specific measurable objective.  Professional players vie for tens of millions of dollars in prize pools each year, and over 2 billion games have been played.  The results in this paper are using data from a cache of 500 GB of aggregated game data ($\sim$ 2.5 million games played over one year) and from X GB of raw, event-by-event data.  Our goal is to use this data to shed light on how we can 1) detect and 2) quantify the rate of change of strategies in co-evolutionary systems.  This is akin to the classic `Red Queen hypothesis' in evolutionary biology, but in this case we are interested in human behaviors where a strategy can be considered most generally as a `meme' of sorts.  Our hypotheses include: 1) a mapping exists between game observables and a set of strategies, 2) a measurable signal can be extracted from which to ascertain the adoption, stabilization, and decay of specific strategy traits, 3) changes in strategies occur over time, and 4) strategy changes are driven (at least in part) from behaviors of the opposing team.  We postulate that testing these hypotheses will require an understanding of the co-evolutionary dynamics of the overall environment.  In particular, the human behavioral components underlying the adversary/defense team actions will need to be assessed.  The use of data from a multiplayer online game for this purpose assumes there is a valid mapping between the `game-space' to `cyber-space' behaviors from which useful inferences can be made.  Through this exercise we hope to understand what types of data (if any) are useful for this purpose and how one might develop proxies to characterize strategies.  Ultimately, we hope that the analysis could be applied against realistic data specific to a cyber intrusion.  
+Existing performance metrics of cyber intrusion detection algorithms, such as false positive or negative rates, are unable to capture the level of granularity necessary to significantly improve the algorithms, especially when a single, definitive outcome is rarely the case for this domain.  Traditional static cyber defense systems also require long lead times to install patch updates, and staving off damage in real time is unfeasible using these metrics.  Therefore, metrics must evolve to provide real-time evaluations of adaptive adversaries whose strategies may change depending on the protective mechanisms they encounter, as well as characterizing sequences of detections.  
+
+Usable data from within the cyber domain that may help to strengthen detection algorithm scoring is nearly nonexistent.  If actual attacks are documented in the real world, this data is rarely made available and may be network specific (hence, not generalizable).   Thus, a proxy for the data is necessary.  An online battle arena video game called Defense of the Ancients 2 (DOTA 2) is a rich data source of real-time adaptive adversaries.  DOTA 2 is a strategic, competitive, multiplayer game where two teams of five individuals each compete against each other to complete objectives and to destroy the other team?s base in a time frame of $\sim$ 20 to $\sim$ 90 minutes.  The players deploy various in-game and between-game tactics and procedures to achieve a specific measurable objective.  Professional players vie for tens of millions of dollars in prize pools each year, and over 2 billion games have been played.  The results in this paper are using data from a cache of 500 GB of aggregated game data ($\sim$ 2.5 million games played over one year) and from X GB of raw, event-by-event data.  Our goal is to use this data to shed light on how we can 1) detect and 2) quantify the rate of change of strategies in co-evolutionary systems.  
+
+This is akin to the classic `Red Queen hypothesis' in evolutionary biology, but in this case we are interested in human behaviors where a strategy can be considered most generally as a `meme' of sorts.  Our hypotheses include: 1) a mapping exists between game observables and a set of strategies, 2) a measurable signal can be extracted from which to ascertain the adoption, stabilization, and decay of specific strategy traits, 3) changes in strategies occur over time, and 4) strategy changes are driven (at least in part) from behaviors of the opposing team.  We postulate that testing these hypotheses will require an understanding of the co-evolutionary dynamics of the overall environment.  In particular, the human behavioral components underlying the adversary/defense team actions will need to be assessed.  The use of data from a multiplayer online game for this purpose assumes there is a valid mapping between the `game-space' to `cyber-space' behaviors from which useful inferences can be made.  Through this exercise we hope to understand what types of data (if any) are useful for this purpose and how one might develop proxies to characterize strategies.  Ultimately, we hope that the analysis could be applied against realistic data specific to a cyber intrusion.  
 
 \section{The Game: DOTA 2}
 
 An aerial view of the DOTA game board is shown in Fig.~\ref{gameboard}.  The goal of the game is to destroy the opposing team's base, their Ancient, located either in the lower left or upper right corner of the figure.  
 
 \begin{figure}[h]
-\centerline{\includegraphics[width=.9\linewidth]{./Figs/GameBoard.pdf}}
+\centerline{\includegraphics[width=.8\linewidth]{./Figs/GameBoard.png}}
 \caption{Game board of DOTA 2.}\label{gameboard}
 \end{figure}
 
@@ -224,20 +228,56 @@ Heroes are chosen from a pool of $\sim$ 120 characters.  In professional games, 
 B1 B2 B1 B2 P1 P2 P2 P1 B1 B2 B1 B2 P2 P1 P2 P1 B2 B1 P2 P1
 \\
 \\
-where B indicates a ban, P indicates a pick, and the number refers to the team.  
+where B indicates a ban, P indicates a pick, and the number refers to the team.  The team, character, order, and whether the selection was a pick or a ban is recorded, as well as the team that won the match.
+
 
 
 
 \section{Analysis and Results}
 
-\subsection{Draft}
 
-\subsubsection{Salva} 
+\subsection{Characterizing the complexity of the DOTA 2 draft} 
 
-\subsubsection{Dan}
+An important aspect to consider when comparing our proxy data to real cybersecurity issues is the inherent complexity of the system, i.e. how big and non-trivial the solution space for the game is. In order to gain some insights, we performed a simple analysis on team composition in terms of hero picks and how they affect win rates for the teams, without considering the actual strategies that might be at play once the game starts. In order to do so, we analyzed 84509 league games spanning three DOTA 2 patches introduced by the game developers. Interestingly, we found that even if such balance changes radically modify what heroes and strategies are objectively better, statistical regularities in hero usage can be found that survive these events (Fig.~\ref{frequency_rank_distribution}). Additionally, hero usage was found to be not correlated to win rate (data not shown) suggesting that other processes ({\em i.e.} like copying popular strategies) might underlie player's choices during the draft.  
 
 
-\subsection{Within Game (Anne)}
+\begin{figure}[h]
+\centerline{\includegraphics[width=.9\linewidth]{./Figs/hero_usage_across_patches.pdf}}
+\caption{Frequency of picks in different patches of DOTA 2. Even if different heroes cease to be used or gain notoriety due to balance changes put forward by the developers of the game (plots on the left), statistical regularities can be observed that survive such changes (right side of the panel). For different patches (from 6.83 at the top to 6.85 at the bottom) we show the hero frequency rank distribution, fitted to an exponential distribution with similar exponents ($\gamma$) across various versions of the game.}\label{frequency_rank_distribution}
+\end{figure}
+
+Additionally, we plan to apply the NK landscape framework \cite{Kauffman1987} to the collection of league games. This framework provides a powerful way to formalize the adaptation process given a mapping between a genotype space and the observed phenotype \cite{Levinthal1997}. In our particular dataset these would correspond to team composition (hero picks) and win rates respectively. 
+
+This methodology has proven to be really useful to understand the underlying complexity of many biological processes, such as immunological maturity \cite{Kauffman1989} and cell type differentiation \cite{Kauffman1996} among others. Interestingly, the ruggedness of the fitness landscape is related to the number and intensity of higher order interactions between the different sites in the `genome', tunable in Kauffman's model though the average degree $k$ (Fig.~\ref{landscape}). 
+
+Finding high values of $k$ in the DOTA2 system would imply that heroes have relevant synergies, both positive and negative, that can have a huge impact in the drafting process. Ideally, teams would try to ban positive synergies for the opposing team, while maximizing their own fitness at the same time. However, navigating NK landscapes has been shown to be NP-complete for $k \geq 2$ \cite{Weinberger1996}.
+
+\begin{figure}[h]
+\centerline{\includegraphics[width=.75\linewidth]{./Figs/landscape.pdf}}
+\caption{Fitness landscapes obtained from Kauffman's NK model. At low average connectivity for genome sites \textbf{(a)} the landscape can be navigated, in the sense that a greedy algorithm can easily find the best global strategy. Conversely, as $k$ increases \textbf{(b)}, it becomes increasingly difficult to find the global optimum, instead a greedy algorithm might easily get stuck in a local peak.}\label{landscape}
+\end{figure}
+
+
+
+\subsection{Characterizing the draft with a hidden Markov model} 
+
+
+\subsubsection{Model}
+
+Initially, the process was modeled as a Markov Decision Tree. However, due to the massive number of possible states, e.g. 3$^{112}$, corresponding to the 112 characters and the option for unused, picked, or banned for each one, and the 69,464 transitions corresponding to 3,493 games for the pro game data set, the data was insufficient to analyze the data in this manner.
+
+The next step was to coarse grain the heroes into groups based on information from the game. The simplest available method to do this was to use character descriptions from the game itself, which groups the characters into classes of strength, agility, and intelligence. Additionally, each character fills one of nine roles, leading to coarse graining into possibly 27, 9, or 3 groups, which should lead to sufficient state density to perform Hidden Markov Model type analyses.
+
+\subsubsection{Further Analysis}
+
+Once the data is coarse grained into the described groups, a Hidden Markov Model will be generated to describe the underlying strategy of the players in determining their next pick or ban in the draft phase of the game. Additionally, further work into the optimal coarse graining of the characters may yield insights into how they could be grouped for this analysis. Possible unsupervised learning algorithms may be useful for this portion of the analysis.
+
+
+
+
+
+
+\subsection{Within Game}
 
 Data from throughout each game was extracted and analyzed in order to determine underlying strategies.  A hidden Markov model was used and is discussed below after an overview of the data processing.  
 
@@ -299,6 +339,7 @@ Future work will involve unsupervised learning in order to extract the states, u
 
 \subsection{Between Games (Marla)}
 
+Explore why and when players change teams.  Network analysis.  
 
 \section{Conclusions}
 
@@ -309,18 +350,18 @@ X
 %	APPENDICES (OPTIONAL)
 %----------------------------------------------------------------------------------------
 
-\appendix
-An appendix without a title.
+%\appendix
+%An appendix without a title.
 
-\appendix[Appendix title]
-An appendix with a title.
+%\appendix[Appendix title]
+%An appendix with a title.
 
 %----------------------------------------------------------------------------------------
 %	ACKNOWLEDGEMENTS
 %----------------------------------------------------------------------------------------
 
 \begin{acknowledgments}
-x
+We would like to acknowledge the originator of this idea, David Slater.  Domain knowledge is key.  We would also like to acknowledge Sanith Sanith Wijesinghe, Matt Koehler, and Shaun Michel of the MITRE Corporation; and Simon DeDeo of the Santa Fe Institute for their input and advice.  
 \end{acknowledgments}
 
 %----------------------------------------------------------------------------------------
@@ -351,8 +392,25 @@ x
 
 %% Enter the largest bibliography number in the facing curly brackets
 %% following \begin{thebibliography}
-
 \bibliography{}
+
+\begin{thebibliography}{100}
+\bibitem{Kauffman1987}
+Kauffman, Stuart, \& Simon Levin. Towards a general theory of adaptive walks on rugged landscapes. {\em Journal of theoretical Biology} 128.1 (1987): 11-45.
+
+\bibitem{Levinthal1997}
+Levinthal, Daniel A. Adaptation on rugged landscapes. {\em Management science} 43.7 (1997): 934-950.
+
+\bibitem{Kauffman1989}
+Kauffman, Stuart A., and Edward D. Weinberger. The NK model of rugged fitness landscapes and its application to maturation of the immune response. {\em Journal of theoretical biology} 141.2 (1989): 211-245.
+
+\bibitem{Kauffman1996}
+Kauffman, Stuart. At home in the universe: The search for the laws of self-organization and complexity. Oxford university press, 1996.
+
+\bibitem{Weinberger1996}
+Weinberger, Edward D. Np completeness of kauffman's NK model, a tuneable rugged fitness landscape. No. 96-02-003. 1996.
+
+\end{thebibliography}
 \bibliographystyle{unsrt}
 
 %----------------------------------------------------------------------------------------
