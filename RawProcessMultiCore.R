@@ -8,11 +8,21 @@ require(parallel)
 require(jsonlite)
 require(grid)
 require(rio)
+require(dplyr)
+filter<-dplyr::filter 
+mutate<-dplyr::mutate
+select<-dplyr::select
 
 args<-commandArgs(TRUE)
 if (length(args)==0) {
-        stop("At least one argument must be supplied (directory name).n", call.=FALSE)
+        stop("Arguments must be supplied (at least 'directory_for_general_files root_directory_path n_cores')", call.=FALSE)
 } 
+
+
+
+####### FUNCTIONS ########## 
+
+
 
 disthero<-function(df,i1,j1,i2,j2){
         # calculate euclidean distance from df for all rows for the given pair of heroes i and j
@@ -183,6 +193,7 @@ normalize_XY<-function(dfbpos,coord,team,useS=T){
         dfbpos
 }
 RawProcess<-function(kdf,agg,checkConvert=F,versionConvert=NULL){
+        # main function to read in files and convert
         
         print(paste0("Working on match ID: ",kdf$match_id[1]," (",kdf$dirfiles[1],")"))
         #files<-list.files(path=dirfiles,pattern="*\\_clean.json$",full.names=T)
@@ -349,119 +360,134 @@ RawProcess<-function(kdf,agg,checkConvert=F,versionConvert=NULL){
         #file.remove("772548096.dem.results.timeseries.csv") # remove csv file created in working directory
 }
 
+gamestatsfunction<-function(maindir,kdf){
+        # read in aggregated data to get overall game stats, write stats to maindir/gamestats.csv
+        agg<-fromJSON(paste0(maindir,"/gameDetails.json"))
+        agg_ind<-sapply(unique(kdf$match_id),function(i) which(names(agg)==i)) # find all indices of matching games
+        agg_ind<-unlist(agg_ind)
+        gamestatsfilename<-paste0(maindir,"/gamestats.csv")
+        
+        if (file.exists(gamestatsfilename)){ 
+                # read in previous game stats, if applicable
+                gamestats<-read.csv(gamestatsfilename,stringsAsFactors = F)
+        }else{
+                gamestats<-data.frame()
+        }
+        gamestats0<-data.frame()
+        for (i in agg_ind){
+                # for each game, bring out stats into df
+                agg_game<-agg[[i]] # isolate aggregated stats for relevant game
+                temp<-data.frame(agg_game$match_id,agg_game$radiant_win,agg_game$duration,agg_game$radiant_score,
+                                 agg_game$dire_score,agg_game$leagueid,agg_game$start_time,agg_game$lobby_type,
+                                 agg_game$game_mode)
+                players<-agg_game$players$account_id
+                players<-players[order(players)]
+                players<-data.frame(t(players))
+                names(players)<-gsub("X","P",names(players))
+                gamestats0<-rbind(gamestats0,cbind(temp,players))
+        }
+        names(gamestats0)<-gsub("agg\\_game\\.","",names(gamestats0))
+        gamestats<-rbind(gamestats,gamestats0)
+        gamestats<-unique(gamestats)
+        gamestats<-arrange(gamestats,start_time)
+        
+        # write out to file
+        write.csv(gamestats,gamestatsfilename,row.names=F)
+        #write.table(gamestats,"gamestats.csv",row.names=F,col.names = T,append=F,sep=",")
+        #write.table(gamestats,"gamestats.csv",row.names=F,col.names = F,append=T,sep=",")
+        return(agg)
+}
 
-# input parameters
+filehandling<-function(rootdirfiles){
+        ### FILE HANDLING ### output data frame with all file info
+        dirfiles<-list.dirs(rootdirfiles) # find all subdirectories
+        
+        # build data frame with file paths, match_ids, and if conversion is necessary from binary
+        kdf0<-data.frame()
+        for (i in dirfiles){
+                #kfilesjson<-dir(path=i,pattern=".dem.results.json",full.names = F)
+                kfilesjson<-dir(path=i,pattern=".dem.results$",full.names = F) #json files to process
+                kfilesconvert<-dir(path=i,pattern=".dem$",full.names = F) # raw binary files
+                
+                # eliminate previously converted binary files
+                if (length(kfilesconvert)>0){
+                        kfilesconvert<-paste0(kfilesconvert,".results")
+                        kfilesconvert<-outersect(kfilesjson,kfilesconvert) 
+                }
+                
+                if (length(kfilesjson)>0) { # if files are found to be processed in the given subdirectory 
+                        kfilescsv<-dir(path=i,pattern=".dem.results.timeseries.csv.zip",full.names = F) # check for previously converted files to skip
+                        if (length(kfilescsv)>0) {
+                                #kfilescsv<-gsub(".timeseries.csv.zip",".json",kfilescsv)
+                                kfilescsv<-gsub(".timeseries.csv.zip","",kfilescsv)
+                                kfilesjson<-outersect(kfilesjson,kfilescsv) # compare already converted files to file list and eliminate ones already converted so only new files are run
+                        }
+                        #if there are files that do not need conversion, add to data frame with convert = F flag
+                        temp<-data.frame(dirfiles=i,kfilesjson=kfilesjson,convert=F,stringsAsFactors = F) 
+                        kdf0<-rbind(kdf0,temp)
+                        
+                        # if there are files to be converted, add to data frame with convert = T flag
+                        if (length(kfilesconvert)>0){
+                                temp<-data.frame(dirfiles=i,kfilesjson=kfilesconvert,convert=T,stringsAsFactors = F)
+                                kdf0<-rbind(kdf0,temp)
+                        }
+                        
+                }
+        }
+        if (nrow(kdf0)==0) stop("Error (maybe?)! No files to be processed!")
+        
+        kdf0$match_id<-sapply(strsplit(kdf0$kfilesjson,"\\."),function(i)i[[1]]) # find match_id from filename
+        kdf<-kdf0
+        # eliminate duplicate match_ids (e.g., if file is in multiple subdirectories)
+        kdf$rep<-F
+        kdf<-kdf %>% arrange(match_id)
+        for (i in 2:nrow(kdf)){
+                if (kdf$match_id[i]==kdf$match_id[i-1]) kdf$rep[i]<-T       
+        }
+        kdf<-kdf %>% filter(!rep) %>% select(-rep) # keep only first file, remove duplciates
+        
+        
+        
+        # kfiles<-dir(path=dirfiles,pattern = ".dem.results.json") # find files to convert from json to csv.zip
+        # kfilescsv<-dir(path=dirfiles,pattern=".dem.results.timeseries.csv.zip") # find all already converted files
+        # kfilescsv<-gsub(".timeseries.csv.zip",".json",kfilescsv)
+        # kfiles<-outersect(kfiles,kfilescsv) # compare already converted files to file list and eliminate ones already converted so only new files are run
+        
+        kdf
+}
+
+####### END OF FUNCTIONS ########## 
+
+
+
+
+####### input parameters ########
 maindir<-args[1]
 rootdirfiles<-args[2] # read in directory from command line, no ending backslash on path. e.g., /Users/asallaska/SFI/DOTA/data/raw/full
 ncores<-as.numeric(args[3])
 checkConvert<-args[4]
 versionConvert<-args[5]
+####### end input parameters ########
 
 checkConvert<-ifelse(checkConvert=="T",T,F) 
-
 #print(c(maindir,rootdirfiles,ncores,checkConvert,versionConvert))
 
-### FILE HANDLING ###
-dirfiles<-list.dirs(rootdirfiles)
-gamestatsfilename<-paste0(maindir,"/","gamestats.csv")
+######## FILEHANDLING: figure out which files to process and where ####### 
+kdf<-filehandling(rootdirfiles)
 
-# build data frame with file paths and match_ids           
-kdf0<-data.frame()
-for (i in dirfiles){
-        #kfilesjson<-dir(path=i,pattern=".dem.results.json",full.names = F)
-        kfilesjson<-dir(path=i,pattern=".dem.results$",full.names = F)
-        kfilesconvert<-dir(path=i,pattern=".dem$",full.names = F)
-        
-        if (length(kfilesconvert)>0){
-                kfilesconvert<-paste0(kfilesconvert,".results")
-                kfilesconvert<-outersect(kfilesjson,kfilesconvert)
-        }
-        
-        if (length(kfilesjson)>0) { # if json files are found
-                kfilescsv<-dir(path=i,pattern=".dem.results.timeseries.csv.zip",full.names = F) # check for previously converted files to skip
-                if (length(kfilescsv)>0) {
-                        #kfilescsv<-gsub(".timeseries.csv.zip",".json",kfilescsv)
-                        kfilescsv<-gsub(".timeseries.csv.zip","",kfilescsv)
-                        kfilesjson<-outersect(kfilesjson,kfilescsv) # compare already converted files to file list and eliminate ones already converted so only new files are run
-                }
-                temp<-data.frame(dirfiles=i,kfilesjson=kfilesjson,convert=F,stringsAsFactors = F)
-                kdf0<-rbind(kdf0,temp)
-                
-                if (length(kfilesconvert)>0){
-                        temp<-data.frame(dirfiles=i,kfilesjson=kfilesconvert,convert=T,stringsAsFactors = F)
-                        kdf0<-rbind(kdf0,temp)
-                }
-                
-        }
-}
-if (nrow(kdf0)==0) stop("Error (maybe?)! No files to be processed!")
-kdf0$match_id<-sapply(strsplit(kdf0$kfilesjson,"\\."),function(i)i[[1]])
-kdf<-kdf0
-kdf$rep<-F
-kdf<-kdf %>% arrange(match_id)
-for (i in 2:nrow(kdf)){
-        if (kdf$match_id[i]==kdf$match_id[i-1]) kdf$rep[i]<-T       
-}
-kdf<-kdf %>% filter(!rep) %>% select(-rep)
-
-
-
-# kfiles<-dir(path=dirfiles,pattern = ".dem.results.json") # find files to convert from json to csv.zip
-# kfilescsv<-dir(path=dirfiles,pattern=".dem.results.timeseries.csv.zip") # find all already converted files
-# kfilescsv<-gsub(".timeseries.csv.zip",".json",kfilescsv)
-# kfiles<-outersect(kfiles,kfilescsv) # compare already converted files to file list and eliminate ones already converted so only new files are run
-
-
-# CORES
+######## PARALLEL PROCESSING #########
 # find indicies to split data on, in order to parallel process
-
 n<-c(seq(1,nrow(kdf),ncores),nrow(kdf))
-
-
-# split up data frame into 8 parts in a list in order to parallel process
-if (length(n)==2){ # not enough to fill up all cores in one process
-        adjustindex<-0        
-}else{
-        adjustindex<-1
-}
+adjustindex<-ifelse(length(n)==2,0,1)# not enough to fill up all cores in one process
+# split up data frame into ncore parts in a list in order to parallel process
 kfileslist<-lapply(1:(length(n)-1),function(i) kdf[n[i]:(n[i+1]-adjustindex),])
 
 
-
-
-# read in aggregated data to get overall game stats
-agg<-fromJSON(paste0(maindir,"/gameDetails.json"))
-agg_ind<-sapply(unique(kdf$match_id),function(i) which(names(agg)==i))
-agg_ind<-unlist(agg_ind)
-if (file.exists(gamestatsfilename)){
-        gamestats<-read.csv(gamestatsfilename,stringsAsFactors = F)
-}else{
-        gamestats<-data.frame()
-}
-gamestats0<-data.frame()
-for (i in agg_ind){
-        agg_game<-agg[[i]] # isolate aggregated stats for relevant game
-        temp<-data.frame(agg_game$match_id,agg_game$radiant_win,agg_game$duration,agg_game$radiant_score,
-                         agg_game$dire_score,agg_game$leagueid,agg_game$start_time,agg_game$lobby_type,
-                         agg_game$game_mode)
-        players<-agg_game$players$account_id
-        players<-players[order(players)]
-        players<-data.frame(t(players))
-        names(players)<-gsub("X","P",names(players))
-        gamestats0<-rbind(gamestats0,cbind(temp,players))
-}
-names(gamestats0)<-gsub("agg\\_game\\.","",names(gamestats0))
-gamestats<-rbind(gamestats,gamestats0)
-gamestats<-unique(gamestats)
-gamestats<-arrange(gamestats,start_time)
-
-
-write.csv(gamestats,gamestatsfilename,row.names=F)
-#write.table(gamestats,"gamestats.csv",row.names=F,col.names = T,append=F,sep=",")
-#write.table(gamestats,"gamestats.csv",row.names=F,col.names = F,append=T,sep=",")
+######## GAME STATS ###########
+agg<-gamestatsfunction(maindir,kdf) # find read in game stats and write aggregated stats to file
 
 ### MAIN CODE ### 
-# convert json into csv.zip for each section of the files, using multiple cores (8 below)
+# convert raw files into csv.zip for each section of the files, using multiple cores 
 for (i in 1:length(kfileslist)){
         ls<-mclapply(1:nrow(kfileslist[[i]]),function(j) RawProcess(kfileslist[[i]][j,],agg,checkConvert,versionConvert),mc.cores=nrow(kfileslist[[i]]))
 }
