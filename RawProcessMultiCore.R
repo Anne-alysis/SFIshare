@@ -230,7 +230,7 @@ RawProcess<-function(kdf,agg,checkConvert=F,versionConvert=NULL){
         
         # check structure of data to ensure all needed variables present. if not, break and do not go farther.  
         typevar<-unique(z$type)
-        if (all(!grepl("GOLD",typevar)) | all(!grepl("XP",typevar)) | all(!grepl("POSITION",typevar))) {
+        if (all(!grepl("GOLD",typevar)) | all(!grepl("XP",typevar)) | all(!grepl("POSITION",typevar)) | all(!grepl("DAMAGE",typevar)) | all(!grepl("DEATH",typevar))) {
                 print(paste0("ABORTED (",z$match_id[1],")! Not all necessary variables are available to be parsed."))
         }else{
         
