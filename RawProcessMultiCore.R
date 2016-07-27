@@ -1,8 +1,9 @@
 
 # Summary:
-# Converts each raw json file match\_id.dem.results.json from a json format of each 
-# entry is a separate event into each entry is a unique time stamp with all events 
-# that occur at that step.  Assumes an 8 core machine.  Produces match\_id.dem.results.csv.zip files. 
+# Converts either raw binary files (match_id.dem) or converted json files (match_id.dem.results) 
+# into zipped  time-series csv files for each raw game.  Each row is a separate event.  
+# This script transforms these into a row with a unique time stamp and all events 
+# that occur at that step.  Produces match_id.dem.results.csv.zip files and gamestats.csv for aggregated stats. 
 
 require(parallel)
 require(jsonlite)
@@ -13,6 +14,7 @@ filter<-dplyr::filter
 mutate<-dplyr::mutate
 select<-dplyr::select
 
+# input argument handling
 args<-commandArgs(TRUE)
 if (length(args)==0) {
         stop("Arguments must be supplied (at least 'directory_for_general_files root_directory_path n_cores')", call.=FALSE)
