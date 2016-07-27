@@ -182,13 +182,26 @@ normalize_XY<-function(dfbpos,coord,team,useS=T){
         }
         dfbpos
 }
-RawProcess<-function(dirfiles,stem){
+RawProcess<-function(kdf,agg,checkConvert=F,versionConvert=NULL){
         
-        print(c("Working on match ID: ",strsplit(stem,"\\.")[[1]][1]))
+        print(paste0("Working on match ID: ",kdf$match_id[1]," (",kdf$dirfiles[1],")"))
         #files<-list.files(path=dirfiles,pattern="*\\_clean.json$",full.names=T)
         
-        ##### read in/maniuplate json
-        z<-jsonlite::fromJSON(paste0(dirfiles,stem))
+        ##### read in/manipulate json
+        if (kdf$convert[1] & checkConvert){
+                print(paste0("Converting binary match ID: ",kdf$match_id[1]," (",kdf$dirfiles[1],")"))
+                
+                fileconvert<-gsub("\\.results","",kdf$kfilesjson[1])
+                system(paste0("java -jar ",maindir,"/full-dota2-exp-",versionConvert,".jar ", paste0(kdf$dirfiles[1],"/",fileconvert) ,">", paste0(kdf$dirfiles[1],"/",kdf$kfilesjson[1]) ))
+        }
+        filename<-paste0(kdf$dirfiles[1],"/",kdf$kfilesjson[1])
+        temp<-readLines(filename)
+        temp<-temp[startsWith(temp,"{")] # strip out extra java junk at the beginning of the files
+        z<-jsonlite::fromJSON(paste0("[",paste(temp,collapse=","),"]"))
+        z$match_id<-kdf$match_id[1]
+        z<-z[,c(ncol(z),1:(ncol(z)-1))]
+
+        #z0<-jsonlite::fromJSON(paste0(filename,".json"))
         # simplify tag names and make new variables for the heroes involved in the event
         z<-z %>% mutate(hero=ifelse(grepl("DT_DOTA_Unit_Hero_",type),gsub("DT_DOTA_Unit_Hero_","",type),""),
                         type=ifelse(grepl("DT_DOTA_Unit_Hero_",type),"POSITION",type))
@@ -202,116 +215,132 @@ RawProcess<-function(dirfiles,stem){
         }
         z$match_id<-z$match_id[1] # in case there's a problem with match_ids, propogate down the df
         
+        # check structure of data to ensure all needed variables present. if not, break and do not go farther.  
+        typevar<-unique(z$type)
+        if (all(!grepl("GOLD",typevar)) | all(!grepl("XP",typevar)) | all(!grepl("POSITION",typevar))) {
+                print(paste0("ABORTED (",z$match_id[1],")! Not all necessary variables are available to be parsed."))
+        }else{
         
-        ##### determine which heroes are on which team
-        heroteams<-unique(z %>% filter(!is.na(team)) %>% select(team,hero) %>% mutate(lowerhero=gsub(" |\\_","",hero)))[1:10,]
-        
-        # bring in external hero data to raw file in order to ID heroes from name to number:
-        heroes<-fromJSON("/Users/asallaska/SFI/DOTA/heroes.json")
-        heroes<-heroes$result$heroes
-        heroes$lowerhero<-gsub("npc\\_dota\\_hero\\_","",heroes$name)
-        heroes$lowerhero<-gsub(" |-|\\_|'","",heroes$lowerhero)
-        heroes<-heroes %>% select(id,localized_name,lowerhero) %>% rename(hero_id=id,Hero=localized_name)# %>%
-        heroteams<-left_join(heroteams,heroes,by="lowerhero")
-        
-        # bring in external aggregate data to determine which heroes on which team from draft
-        agg<-fromJSON("/Users/asallaska/SFI/DOTA/data/raw/gameDetails.json")
-        agg_ind<-which(names(agg)==unique(z$match_id)) # isolate the relevant entry in the json by match_id
-        if (length(agg_ind)>0){
-                agg_game<-agg[[agg_ind]] # isolate aggregated stats for relevant game
-                gamestats<-data.frame(agg_game$match_id,agg_game$radiant_win,agg_game$duration,agg_game$radiant_score,
-                                      agg_game$dire_score,agg_game$leagueid,agg_game$start_time,agg_game$lobby_type,
-                                      agg_game$game_mode) # pick out potentially relevant stats
-                names(gamestats)<-gsub("agg\\_game","stats",names(gamestats))
+                ##### determine which heroes are on which team
+                heroteams<-unique(z %>% filter(!is.na(team)) %>% select(team,hero) %>% mutate(lowerhero=gsub(" |\\_","",hero)))[1:10,]
                 
-                # figure out which team is radiant and which is dire
-                picks<-agg_game$picks_bans %>% filter(is_pick) %>% select(-is_pick,-order) %>% rename(team01=team)
-                heroteams<-left_join(heroteams,picks,by="hero_id")
-                heroteams<-heroteams %>% mutate(teamRD=ifelse(team01==0,"Radiant","Dire")) #%>% select(team,teamRD)
-                z<-left_join(z,unique(select(heroteams,team,teamRD)),by="team")
-                no_match<-F
-        }else{
-                # no match in aggregate data, so can only know which heroes on which team (team 2 or 3) and cannot correlate to wins
-                z$teamRD<-z$team
-                heroteams$teamRD<-heroteams$team
-                no_match<-T
-        }
-        z<-unique(z) # remove duplicate rows
-        
-        df<-parallelBuild(z) # main function of this function.  reformat json into time series.
-        
-        # label the teams
-        if (!no_match){
-                team1<-"Radiant"
-                team2<-"Dire"
-        }else{
-                team1<-"2"
-                team2<-"3"
-        }
-        
-        # add relative distances
-        dfpos1<-finddist(df,team1,heroteams) # calculate relative distance for Radiant or team "2"
-        dfpos2<-finddist(df,team2,heroteams) # calculate relative distance for Dire or team "3"
-        dfb<-cbind(df,dfpos1,dfpos2) # bind all together
-        
-        dfbpos<-dfb[,c("match_id","tick","time",grep("^d\\.",names(dfb),value=T),grep("^x\\.|^y\\.",names(dfb),value=T))]
-        
-        useS<-T # if T, use standard deviation to normalize; otherwise, simply subtract off CM 
-        # normalize each coordinate for each team to the team center of mass 
-        dfbpos<-normalize_XY(dfbpos,"X",team1,useS)
-        dfbpos<-normalize_XY(dfbpos,"Y",team1,useS)
-        dfbpos<-normalize_XY(dfbpos,"X",team2,useS)
-        dfbpos<-normalize_XY(dfbpos,"Y",team2,useS)
-        
-        # find position to filter out all rows until each hero has a definite position (they are zero until they appear on the game board)
-        for (i in 1:nrow(dfbpos)){
-                itest<-i
-                test<-any(select(dfbpos,grep("^x\\.|^y\\.",names(dfbpos)))[i,]==0)
-                if (!test) break
-        }
-        dfbpos<-dfbpos[itest:nrow(dfbpos),]
-        
-        # because eliminating the zero position rows above, need to take into account heroes that received gold 
-        # during those eliminated rows/times.  this simply copies what they received previous to the first time step kept
-        # and sums that up and copies into the first kept time step.  Most simply receive 625 gold pieces.  
-        dfb_gold<-colSums(dfb[1:itest,grep("^net\\.GOLD\\.",names(dfb))])
-        dfb<-dfb[itest:nrow(dfb),] # filter out rows
-        # add 625 to net gold to who it's now cut off for
-        ind<-grep("^net\\.GOLD\\.",names(dfb))
-        dfb[1,ind]<-dfb_gold
-        
-        # bind normalized position info back to the main df
-        dfb<-cbind(dfb,dfbpos[,grep("^norm\\.",names(dfbpos))])
-        
-        
-        # add game stats, if match
-        if (length(agg_ind)>0){
-                for (j in names(gamestats)){
-                        dfb[,j]<-gamestats[,j]
+                # bring in external hero data to raw file in order to ID heroes from name to number:
+                heroes<-fromJSON(paste0(maindir,"/heroes.json"))
+                heroes<-heroes$result$heroes
+                heroes$lowerhero<-gsub("npc\\_dota\\_hero\\_","",heroes$name)
+                heroes$lowerhero<-gsub(" |-|\\_|'","",heroes$lowerhero)
+                heroes<-heroes %>% select(id,localized_name,lowerhero) %>% rename(hero_id=id,Hero=localized_name)# %>%
+                heroteams<-left_join(heroteams,heroes,by="lowerhero")
+                
+                # bring in external aggregate data to determine which heroes on which team from draft
+                agg_ind<-which(names(agg)==unique(z$match_id)) # isolate the relevant entry in the json by match_id
+                if (length(agg_ind)>0){
+                        agg_game<-agg[[agg_ind]] # isolate aggregated stats for relevant game
+                        # gamestats<-data.frame(agg_game$match_id,agg_game$radiant_win,agg_game$duration,agg_game$radiant_score,
+                        #                       agg_game$dire_score,agg_game$leagueid,agg_game$start_time,agg_game$lobby_type,
+                        #                       agg_game$game_mode) # pick out potentially relevant stats
+                        # #names(gamestats)<-gsub("agg\\_game","stats",names(gamestats))
+                        # names(gamestats)<-gsub("agg\\_game\\.","",names(gamestats))
+                        # 
+                        # players<-agg_game$players$account_id
+                        # players<-players[order(players)]
+                        # players<-data.frame(t(players))
+                        # names(players)<-gsub("X","P",names(players))
+                        # gamestats<-cbind(gamestats,players)
+                        # #write.csv(gamestats,"gamestats.csv",row.names=F)
+                        # #write.table(gamestats,"gamestats.csv",row.names=F,col.names = T,append=F,sep=",")
+                        # write.table(gamestats,"gamestats.csv",row.names=F,col.names = F,append=T,sep=",")
+                        
+                        # figure out which team is radiant and which is dire
+                        picks<-agg_game$picks_bans %>% filter(is_pick) %>% select(-is_pick,-order) %>% rename(team01=team)
+                        heroteams<-left_join(heroteams,picks,by="hero_id")
+                        heroteams<-heroteams %>% mutate(teamRD=ifelse(team01==0,"Radiant","Dire")) #%>% select(team,teamRD)
+                        z<-left_join(z,unique(select(heroteams,team,teamRD)),by="team")
+                        no_match<-F
+                }else{
+                        # no match in aggregate data, so can only know which heroes on which team (team 2 or 3) and cannot correlate to wins
+                        z$teamRD<-z$team
+                        heroteams$teamRD<-heroteams$team
+                        no_match<-T
                 }
+                z<-unique(z) # remove duplicate rows
+                
+                df<-parallelBuild(z) # main function of this function.  reformat json into time series.
+                
+                # label the teams
+                if (!no_match){
+                        team1<-"Radiant"
+                        team2<-"Dire"
+                }else{
+                        team1<-"2"
+                        team2<-"3"
+                }
+                        
+                
+                # add relative distances
+                dfpos1<-finddist(df,team1,heroteams) # calculate relative distance for Radiant or team "2"
+                dfpos2<-finddist(df,team2,heroteams) # calculate relative distance for Dire or team "3"
+                dfb<-cbind(df,dfpos1,dfpos2) # bind all together
+                
+                dfbpos<-dfb[,c("match_id","tick","time",grep("^d\\.",names(dfb),value=T),grep("^x\\.|^y\\.",names(dfb),value=T))]
+                
+                useS<-T # if T, use standard deviation to normalize; otherwise, simply subtract off CM 
+                # normalize each coordinate for each team to the team center of mass 
+                dfbpos<-normalize_XY(dfbpos,"X",team1,useS)
+                dfbpos<-normalize_XY(dfbpos,"Y",team1,useS)
+                dfbpos<-normalize_XY(dfbpos,"X",team2,useS)
+                dfbpos<-normalize_XY(dfbpos,"Y",team2,useS)
+                
+                # find position to filter out all rows until each hero has a definite position (they are zero until they appear on the game board)
+                for (i in 1:nrow(dfbpos)){
+                        itest<-i
+                        test<-any(select(dfbpos,grep("^x\\.|^y\\.",names(dfbpos)))[i,]==0)
+                        if (!test) break
+                }
+                dfbpos<-dfbpos[itest:nrow(dfbpos),]
+                
+                # because eliminating the zero position rows above, need to take into account heroes that received gold 
+                # during those eliminated rows/times.  this simply copies what they received previous to the first time step kept
+                # and sums that up and copies into the first kept time step.  Most simply receive 625 gold pieces.  
+                dfb_gold<-colSums(dfb[1:itest,grep("^net\\.GOLD\\.",names(dfb))])
+                dfb<-dfb[itest:nrow(dfb),] # filter out rows
+                # add 625 to net gold to who it's now cut off for
+                ind<-grep("^net\\.GOLD\\.",names(dfb))
+                dfb[1,ind]<-dfb_gold
+                
+                # bind normalized position info back to the main df
+                dfb<-cbind(dfb,dfbpos[,grep("^norm\\.",names(dfbpos))])
+                
+                
+                # add game stats, if match.  NO LONGER NEEDED BECAUSE SAVING IN SEPARATE FILE "gamestats.csv"
+                # if (length(agg_ind)>0){
+                #         for (j in names(gamestats)){
+                #                 dfb[,j]<-gamestats[,j]
+                #         }
+                # }
+        
+                #### NORMALIZE all variables but positions (normalized separately above)
+                ### removed in order to allow flexibility with data handling down the line.  net variables
+                # now normalized in AggregateGamesCluster.R
+        
+                # # normalize
+                # ind<-grep("^net\\.",names(dfb))
+                # # find mean, mu, from each column and standard dev, s
+                # mu<-data.frame(t(colMeans(dfb[,ind])))
+                # mu<-mu[rep(1,nrow(dfb)),]
+                # s<-data.frame(t(apply(dfb[,ind],2,sd)))
+                # s<-s[rep(1,nrow(dfb)),]
+                # 
+                # dfb[,ind]<-(dfb[,ind] - mu)/s
+                
+                dffinal<-dfb
+                
+                # write df to output file as csv and then zip, removing the csv
+                newpath<-paste0(kdf$dirfiles[1],"/",gsub("json","timeseries",kdf$kfilesjson[1]),".csv")
+                export(dffinal,newpath)
+                zip(paste0(newpath,".zip"),newpath)
+                file.remove(newpath)
         }
-
-        #### NORMALIZE all variables but positions (normalized separately above)
-        ### removed in order to allow flexibility with data handling down the line.  net variables
-        # now normalized in AggregateGamesCluster.R
-
-        # # normalize
-        # ind<-grep("^net\\.",names(dfb))
-        # # find mean, mu, from each column and standard dev, s
-        # mu<-data.frame(t(colMeans(dfb[,ind])))
-        # mu<-mu[rep(1,nrow(dfb)),]
-        # s<-data.frame(t(apply(dfb[,ind],2,sd)))
-        # s<-s[rep(1,nrow(dfb)),]
-        # 
-        # dfb[,ind]<-(dfb[,ind] - mu)/s
-        
-        dffinal<-dfb
-        
-        # write df to output file as csv and then zip, removing the csv
-        newpath<-paste0(dirfiles,gsub("json","timeseries",stem),".csv")
-        export(dffinal,newpath)
-        zip(paste0(newpath,".zip"),newpath)
-        file.remove(newpath)
         return(0)
         
         # to read: 
@@ -321,23 +350,122 @@ RawProcess<-function(dirfiles,stem){
 }
 
 
+# input parameters
+maindir<-args[1]
+rootdirfiles<-args[2] # read in directory from command line, no ending backslash on path. e.g., /Users/asallaska/SFI/DOTA/data/raw/full
+ncores<-as.numeric(args[3])
+checkConvert<-args[4]
+versionConvert<-args[5]
+
+checkConvert<-ifelse(checkConvert=="T",T,F) 
+
+#print(c(maindir,rootdirfiles,ncores,checkConvert,versionConvert))
 
 ### FILE HANDLING ###
-dirfiles<-args[1] # read in directory from command line
-kfiles<-dir(path=dirfiles,pattern = ".dem.results.json") # find files to convert from json to csv.zip
-kfilescsv<-dir(path=dirfiles,pattern=".dem.results.timeseries.csv.zip") # find all already converted files
-kfilescsv<-gsub(".timeseries.csv.zip",".json",kfilescsv)
-kfiles<-outersect(kfiles,kfilescsv) # compare already converted files to file list and eliminate ones already converted so only new files are run
+dirfiles<-list.dirs(rootdirfiles)
+gamestatsfilename<-paste0(maindir,"/","gamestats.csv")
 
+# build data frame with file paths and match_ids           
+kdf0<-data.frame()
+for (i in dirfiles){
+        #kfilesjson<-dir(path=i,pattern=".dem.results.json",full.names = F)
+        kfilesjson<-dir(path=i,pattern=".dem.results$",full.names = F)
+        kfilesconvert<-dir(path=i,pattern=".dem$",full.names = F)
+        
+        if (length(kfilesconvert)>0){
+                kfilesconvert<-paste0(kfilesconvert,".results")
+                kfilesconvert<-outersect(kfilesjson,kfilesconvert)
+        }
+        
+        if (length(kfilesjson)>0) { # if json files are found
+                kfilescsv<-dir(path=i,pattern=".dem.results.timeseries.csv.zip",full.names = F) # check for previously converted files to skip
+                if (length(kfilescsv)>0) {
+                        #kfilescsv<-gsub(".timeseries.csv.zip",".json",kfilescsv)
+                        kfilescsv<-gsub(".timeseries.csv.zip","",kfilescsv)
+                        kfilesjson<-outersect(kfilesjson,kfilescsv) # compare already converted files to file list and eliminate ones already converted so only new files are run
+                }
+                temp<-data.frame(dirfiles=i,kfilesjson=kfilesjson,convert=F,stringsAsFactors = F)
+                kdf0<-rbind(kdf0,temp)
+                
+                if (length(kfilesconvert)>0){
+                        temp<-data.frame(dirfiles=i,kfilesjson=kfilesconvert,convert=T,stringsAsFactors = F)
+                        kdf0<-rbind(kdf0,temp)
+                }
+                
+        }
+}
+if (nrow(kdf0)==0) stop("Error (maybe?)! No files to be processed!")
+kdf0$match_id<-sapply(strsplit(kdf0$kfilesjson,"\\."),function(i)i[[1]])
+kdf<-kdf0
+kdf$rep<-F
+kdf<-kdf %>% arrange(match_id)
+for (i in 2:nrow(kdf)){
+        if (kdf$match_id[i]==kdf$match_id[i-1]) kdf$rep[i]<-T       
+}
+kdf<-kdf %>% filter(!rep) %>% select(-rep)
+
+
+
+# kfiles<-dir(path=dirfiles,pattern = ".dem.results.json") # find files to convert from json to csv.zip
+# kfilescsv<-dir(path=dirfiles,pattern=".dem.results.timeseries.csv.zip") # find all already converted files
+# kfilescsv<-gsub(".timeseries.csv.zip",".json",kfilescsv)
+# kfiles<-outersect(kfiles,kfilescsv) # compare already converted files to file list and eliminate ones already converted so only new files are run
+
+
+# CORES
 # find indicies to split data on, in order to parallel process
-n<-c(seq(1,length(kfiles),8),length(kfiles))
+
+n<-c(seq(1,nrow(kdf),ncores),nrow(kdf))
+
 
 # split up data frame into 8 parts in a list in order to parallel process
-kfileslist<-lapply(1:(length(n)-1),function(i) kfiles[n[i]:(n[i+1]-1)])
+if (length(n)==2){ # not enough to fill up all cores in one process
+        adjustindex<-0        
+}else{
+        adjustindex<-1
+}
+kfileslist<-lapply(1:(length(n)-1),function(i) kdf[n[i]:(n[i+1]-adjustindex),])
 
+
+
+
+# read in aggregated data to get overall game stats
+agg<-fromJSON(paste0(maindir,"/gameDetails.json"))
+agg_ind<-sapply(unique(kdf$match_id),function(i) which(names(agg)==i))
+agg_ind<-unlist(agg_ind)
+if (file.exists(gamestatsfilename)){
+        gamestats<-read.csv(gamestatsfilename,stringsAsFactors = F)
+}else{
+        gamestats<-data.frame()
+}
+gamestats0<-data.frame()
+for (i in agg_ind){
+        agg_game<-agg[[i]] # isolate aggregated stats for relevant game
+        temp<-data.frame(agg_game$match_id,agg_game$radiant_win,agg_game$duration,agg_game$radiant_score,
+                         agg_game$dire_score,agg_game$leagueid,agg_game$start_time,agg_game$lobby_type,
+                         agg_game$game_mode)
+        players<-agg_game$players$account_id
+        players<-players[order(players)]
+        players<-data.frame(t(players))
+        names(players)<-gsub("X","P",names(players))
+        gamestats0<-rbind(gamestats0,cbind(temp,players))
+}
+names(gamestats0)<-gsub("agg\\_game\\.","",names(gamestats0))
+gamestats<-rbind(gamestats,gamestats0)
+gamestats<-unique(gamestats)
+gamestats<-arrange(gamestats,start_time)
+
+
+write.csv(gamestats,gamestatsfilename,row.names=F)
+#write.table(gamestats,"gamestats.csv",row.names=F,col.names = T,append=F,sep=",")
+#write.table(gamestats,"gamestats.csv",row.names=F,col.names = F,append=T,sep=",")
 
 ### MAIN CODE ### 
 # convert json into csv.zip for each section of the files, using multiple cores (8 below)
-for (i in 1:length(n)){
-        ls<-mclapply(1:length(kfileslist[[i]]),function(j) RawProcess(dirfiles,kfileslist[[i]][j]),mc.cores=8)
+for (i in 1:length(kfileslist)){
+        ls<-mclapply(1:nrow(kfileslist[[i]]),function(j) RawProcess(kfileslist[[i]][j,],agg,checkConvert,versionConvert),mc.cores=nrow(kfileslist[[i]]))
 }
+
+
+
+
