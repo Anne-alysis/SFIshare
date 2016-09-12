@@ -2,7 +2,10 @@ This is a repository for analysis of DOTA 2 game data done for the Santa Fe Inst
 Systems Summer School (2016) using a hidden Markov model (HMM).  Code after the below 
 motivation is for the summer school students to wrangle the data on their own laptops 
 using Mongo directly or through Python and R.  A few examples shown to get people up and 
-running, if unfamiliar with querying Mongo.
+running, if unfamiliar with querying Mongo.  Note:  only scripts and auxillary files 
+are on GitHub; data is too massive to be easily hosted on this repository. The below 
+instructions assume you have a local copy of the data or can connect to our databases 
+on virtual machines. 
 
 *** Motivation ***
 
