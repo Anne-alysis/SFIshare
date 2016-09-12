@@ -72,10 +72,10 @@ seqconvert<-function(dirpath,match_id,R,D,B,M=F,xtra=""){
                 seqM1<-seqread(dirpath,mfilename1[i],"M",Mformat=0)
                 seqM2<-seqread(dirpath,mfilename2[i],"M",Mformat=1)
                 seqt<-data.frame(seqno=1:length(seqin),ObservedChar=seqin,Hidden=seqout,stringsAsFactors = F)
-                seqt<-seqt %>% mutate(Observed=as.numeric(as.factor(ObservedChar)),Hidden=as.numeric(Hidden))
+                seqt<-seqt %>% mutate(Observed=as.numeric(as.factor(ObservedChar)),Hidden=as.numeric(Hidden)+1)
                 if (M) {
                         seqt$Module1<-as.numeric(as.factor(seqM1)) # H = 1, L = 2
-                        seqt$Module2<-as.numeric(seqM2)
+                        seqt$Module2<-as.numeric(seqM2)+1
                 }
                 seq_meltt<-gather(select(seqt,-ObservedChar),Type,State,-seqno)
                 seq<-c(seq,list(seqt))
@@ -136,7 +136,7 @@ xtra<-"_25cluster_time" # both together, time aggregated
 #xtra<-"_25distclust_timeagg" # both separately
 xtra<-""
 xtra<-"_60s_reorder2_125"
-xtra<-"_60s_reorder2_NEW"
+xtra<-"_60s_reorder2_NEW" # the last ran in july
 
 # xtra<-"_60s_reorder1"
 # xtra<-"_10s_reorder"
@@ -148,7 +148,10 @@ seq<-seq[[1]][[1]] # short form of sequences, "seqno ObservedChar Hidden Observe
 radiant_win<-findwin(match_id) # determine radiant win from aggregated json data
 
 
-# plot the sequences
+### end data gathering for sequence, on to plotting
+
+
+####  plot the sequences, correlations #### 
 
 gtit<-paste0("Evolution of States for Match ID: ",match_id," [Radiant Win: ",radiant_win," ]")
 gtit<-paste0("Evolution of States for Multigames: 60 s aggregation, players ordered by gold and win")
@@ -178,7 +181,6 @@ for (i in 2:nrow(mod)){
                 mod$change[i]<-mod$change[i-1]+1
         }else{
                 mod$change[i]<-mod$change[i-1]
-                
         }
 }
 mod<-dplyr::summarize(group_by(mod,change,State),n=n())
@@ -214,15 +216,16 @@ dev.off()
 
 
 # 
-# # output model
+# # plot the output model
 library(diagram)
 #x<-readLines(paste0(dirpath,"Radiant_776170591.seq_OUT_11states"))
-x<-readLines(paste0(dirpath,"Radiant_772548096.seq_OUT_11states"))
+x<-readLines(paste0(dirpath,"Multigames_60s_reorder2_NEW.seq_OUT_18states"))
 logl<-extract_numeric(gsub("log-l=","",x[1]))
 N<-extract_numeric(x[2]) # number of hidden states
 M<-extract_numeric(x[3]) # number of observed states
 AR<-x[4:(4+N-1)] # hidden transition matrix
 AR<-matrix(unlist(lapply(strsplit(AR," "),as.numeric)),nrow=N,ncol=N,byrow = T)
+AR<-t(AR) # for plotting
 row.names(AR)<-as.character(1:N)
 colnames(AR)<-as.character(1:N)
 pR<-x[(4+N):(4+N+(N-1))] # observed-hidden transition matrix
@@ -231,16 +234,16 @@ row.names(pR)<-as.character(1:N)
 colnames(pR)<-LETTERS[1:M]
 statR<-as.numeric(strsplit(x[4+2*N+1]," ")[[1]]) # stationary state
 
-#pdf("Model.pdf")
+pdf("Model_NEW.pdf")
 pos<-rbind(c(0,0),c(1,0),c(1,0),c(1,1),c(0,2),c(1,2),c(0,3),c(1,3),c(0,4),c(1,4),c(0,5))/10+c(0.5,0.2)
 
-plotmat(round(AR,2),pos=pos,#c(5,6), # will remove edges lower than 0.0001
+plotmat((round(AR,1)), # pos # will remove edges lower than 0.0001
         lwd=1,box.lwd = 2,cex.txt=0.6,box.size = 0.05,#box.type=c("multi","rect","ellipse"),
         box.type="circle",box.prop = .7,box.col="light yellow",#2:8,
         arr.length=.5,arr.width=.2,self.cex=.6,self.shifty = -0.01,
         self.shiftx = .085,main="",shadow.size=0.01,
         arr.lwd=5*AR)
-#dev.off()
+dev.off()
 
 
 
@@ -260,3 +263,120 @@ KL<-KL %>% mutate(ProbRadiant=FreqRadiant/sum(KL$FreqRadiant),ProbDire=FreqDire/
                   div=ProbRadiant*log2(ProbRadiant/ProbDire))
 
 KLDiv<-sum(KL$div)
+
+
+
+
+
+
+
+
+
+
+
+
+
+# temp<-seq_melt %>% mutate(Type=ifelse(Type=="Module1","Module",as.character(Type))) %>% filter(Type!="Module2")
+# temp$Type<-factor(temp$Type,levels=c("Module","Hidden","Observed"))
+# gtit<-paste0("Evolution of States for Multigames: 60 s aggregation, players ordered by gold and win")
+# g<-ggplot(temp,aes(x=seqno,y=State))+geom_line(aes(col=Type))+theme_light()+
+#         labs(x="Sequence Step")+scale_y_continuous(breaks=seq(0,26,2))+
+#         theme(plot.title = element_text(hjust = 0.5),plot.subtitle = element_text(hjust = 0.5,face="italic"))
+# if (R & D) {
+#         g<-g+facet_grid(Type~Team,scales="free_y")
+# }else{
+#         g<-g+facet_grid(Type~.,scales="free_y")
+# }
+# g<-g+geom_vline(xintercept =  filter(seq_melt,Type=="Observed" & State==26)$seqno,linetype="dashed",size=0.3)
+# g
+# pdf("HMM_summary_plot.pdf",width=11,height=8)
+# g
+# dev.off()
+
+
+
+
+
+
+
+
+###### find potential correlations to output of SFIHMM ###### 
+#### seq df is from seq.R !!!!!! 
+#mod<-select(seq,seqno,ObservedChar,Module1)
+mod<-seq
+game<-as.character(unique(dls$match_id))
+# apply match_id to output of SFIHMM (which is just a list of states, uncorrelated to match_id)
+j<-1
+mod$match_id<-game[j]
+for (i in 2:nrow(mod)){
+        if (mod$ObservedChar[i]=="z") {
+                j<-j+1
+                mod$match_id[i]<-game[j]
+        }else{
+                mod$match_id[i]<-mod$match_id[i-1]
+        }
+}
+mod<-filter(mod,ObservedChar!="z") # remove dummy state
+modseq<-dplyr::summarize(group_by(mod,match_id),States=paste(unique(Module2),collapse=",")) # find unique modules for match
+modsum<-dplyr::summarize(group_by(mod,match_id),AvgModuleHL=mean(Module1)) # average over module 1 to see if correlations
+
+# from dls OR from previously written agg_raw_states.csv, find the stats and join to SFIHMM data
+dlsstats<-unique(dls[,c("match_id",grep("^stats\\.",names(dls),value=T))])
+dlsstats$match_id<-as.character(dlsstats$match_id)
+dlsstats<-left_join(dlsstats,modsum,by="match_id")
+dlsstats<-select(dlsstats,match_id,stats.GOLD.TeamWin:stats.duration,AvgModuleHL)
+dlsstats$stats.radiant_win<-as.numeric(dlsstats$stats.radiant_win)
+
+temp<-dlsstats[,2:7]-dlsstats[,8:13] # win stats - lose stats, net stats for winning team over losing team
+names(temp)<-paste0(gsub("\\.TeamWin","",names(temp)),".net")
+dlsstats<-cbind(dlsstats[,grep("TeamWin|TeamLose",names(dlsstats),invert=T)],temp)
+
+# various correlation plots
+col.corrgram<-function(ncol){
+        colorRampPalette(c("darkgoldenrod4","burlywood1","darkkhaki","darkgreen"))(ncol)
+}                
+corrgram(select(dlsstats,-match_id),order=T,lower.panel=panel.shade,upper.panel=panel.pts,
+         text.panel=panel.txt,main="x")
+
+
+panel.hist<-function(x,...){
+        usr <- par("usr"); on.exit(par(usr))
+        par(usr = c(usr[1:2], 0, 1.5) )
+        h <- hist(x, plot = FALSE)
+        breaks <- h$breaks; nB <- length(breaks)
+        y <- h$counts; y <- y/max(y)
+        rect(breaks[-nB], 0, breaks[-1], y, col="cyan", ...)
+}
+panel.smooth<-function (x, y, col = "blue", bg = NA, pch = 18, 
+                        cex = 0.8, col.smooth = "red", span = 2/3, iter = 3, ...) 
+{
+        points(x, y, pch = pch, col = col, bg = bg, cex = cex)
+        ok <- is.finite(x) & is.finite(y)
+        if (any(ok)) 
+                lines(stats::lowess(x[ok], y[ok], f = span, iter = iter), 
+                      col = col.smooth, ...)
+}
+panel.cor <- function(x, y, digits=2, cex.cor)
+{
+        usr <- par("usr"); on.exit(par(usr))
+        par(usr = c(0, 1, 0, 1))
+        r <- abs(cor(x, y))
+        txt <- format(c(r, 0.123456789), digits=digits)[1]
+        test <- cor.test(x,y)
+        Signif <- ifelse(round(test$p.value,3)<0.001,"p<0.001",paste("p=",round(test$p.value,3)))  
+        text(0.5, 0.25, paste("r=",txt))
+        text(.5, .75, Signif)
+}
+
+temp<-dlsstats
+names(temp)<-gsub("stats\\.","",names(temp))
+pdf("Correlations.pdf")
+pairs(select(temp,-match_id),lower.panel=panel.smooth,upper.panel=panel.cor,diag.panel=panel.hist)
+#pairs(select(dlsstats,grep("GOLD|win",names(dlsstats))),lower.panel=panel.smooth,upper.panel=panel.cor,diag.panel=panel.hist)
+dev.off()
+
+
+g<-ggplot(dlsstats,aes(x=AvgModuleHL))+geom_histogram(aes(fill=cut2(stats.duration,g=4)))
+g
+
+

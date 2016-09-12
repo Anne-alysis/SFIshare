@@ -7,11 +7,22 @@
 # for the winning and losing teams.  Correlation plots are also produced.  Average positions for 
 # each kmeans cluster are plotted.  
 
+# to run the HMM on a single machine and generate the above files:
+# 1) HMM: ./parallel glue.rb cores iterationspercore seqfilename.seq
+# 1a) ./parallel_glue.rb 8 10 test_data [start number of states] [max number of states]
+# 2) Viterbi path reconstruction: ./hmm -v seqfilename.seq outputfilename > seqfilename seqfilename_hiddenstates.txt 
+# 3) Two module path: ./hmm -m seqfilename.seq outputfilename > seqfilename_M.txt
+# 4) Multimodule path: ./hmm -M seqfilename.seq outputfilename > seqfilename_M_1.txt
+
+
 require(parallel)
 library(corrgram)
+library(data.table)
+library(dplyr)
 
+### START FUNCTIONS ### 
 normalize_XY_total<-function(dfbpos,coord,useS=T){
-        # normalize x and y for teams *together*
+        # normalize x and y for teams *together*, subtract center of mass, divide by stdev
         # here dfbpos=dfb
         ind<-grepl(paste0("^",tolower(coord),"\\."),names(dfbpos))
         dfbpos[,paste0("totcm.",coord)]<-rowMeans(dfbpos[,ind])
@@ -43,18 +54,38 @@ clustvarfun<-function(kmax,dire,radiant=NULL,itermax=10,tot=F){
         clustvar<-gather(clustvar,Team,Variance,-k)
         clustvar
 }
+
+findGameStats<-function(){
+        # read in aggregated data to get overall game stats
+        agg<-fromJSON("/Users/asallaska/SFI/DOTA/data/raw/gameDetails.json")
+        agg_ind<-sapply(unique(kdf0$match_id),function(i) which(names(agg)==i))
+        gamestats<-data.frame()
+        for (i in agg_ind){
+                agg_game<-agg[[i]] # isolate aggregated stats for relevant game
+                temp<-data.frame(agg_game$match_id,agg_game$radiant_win,agg_game$duration,agg_game$radiant_score,
+                                 agg_game$dire_score,agg_game$leagueid,agg_game$start_time,agg_game$lobby_type,
+                                 agg_game$game_mode)
+                gamestats<-rbind(gamestats,temp)
+        }
+        names(gamestats)[-1]<-gsub("agg\\_game","stats",names(gamestats)[-1])
+        names(gamestats)[1]<-"match_id"
+        gamestats$match_id<-as.character(gamestats$match_id)
+        gamestats
+}
         
-extractSum<-function(kdf,tagg){       
+extractSum<-function(kdf,tagg){     
+        # main function of this script.
         # read in multitude of games, aggregate over "tagg" time scale, slap together, making sure to order the columns as appropriately as possible from game to game
         i<-1
         print(kdf[i,])
         # open relevant file and delete the csv it creates
-        dfb<-read.csv(unzip(paste0(kdf$dirfiles[i],kdf$kfilescsv[i]),junkpaths = T),stringsAsFactors = F,check.names =F)
+        #dfb<-read.csv(unzip(paste0(kdf$dirfiles[i],kdf$kfilescsv[i]),junkpaths = T),stringsAsFactors = F,check.names =F)
+        dfb<-fread(unzip(paste0(kdf$dirfiles[i],kdf$kfilescsv[i]),junkpaths = T),check.names =F)
         fremove<-gsub("\\.zip","",kdf$kfilescsv[i])
         file.remove(fremove) # remove csv file created in working directory
         
         match_id<-dfb$match_id[1] # propogate the match_id in case some are NA
-        dfb$match_id<-match_id
+        dfb$match_id<-as.numeric(match_id)
         
         # somehow certain zip files got duplicate columns with all NAs??  wtf... filter these out and check later
         ind<-names(which(colSums(is.na(dfb))==0))
@@ -167,57 +198,39 @@ extractSum<-function(kdf,tagg){
                 return(NULL)
         }
 }
+# END FUNCTIONS
 
 
-
-
+# MAIN PROGRAM
 
 # setup translation from (possible) deterministic state to number to letter
-
 statetranslate<-data.frame(state=c("5","4-1","3-2","3-1-1",
-                                   "2-2-1","2-1-1-1","1-1-1-1-1"),letter=LETTERS[1:7],num=1:7,
-                           stringsAsFactors = F)
+                "2-2-1","2-1-1-1","1-1-1-1-1"),letter=LETTERS[1:7],num=1:7,
+                stringsAsFactors = F)
 statetranslate<-rbind(statetranslate,data.frame(state="",letter=c(LETTERS[8:26],letters[1:26]),num=8:52))
 
 
-# files to use
+# set directories of files to use
 dirfiles<-c("/Users/asallaska/SFI/DOTA/data/raw/full/TI5/PlayoffsDay7/",
            # "/Users/asallaska/SFI/DOTA/data/raw/full/TestGames/",
-            "/Volumes/BigRed/dota/Replay/TI5small/JSON/")
+            "/Users/asallaska/SFI/DOTA/data/raw/full/David/")
+            #"/Volumes/BigRed/dota/Replay/TI5small/JSON/")
 
 # build data frame with file paths and match_ids           
 kdf0<-data.frame()
 for (i in dirfiles){
-        kfilescsv<-dir(path=i,pattern=".dem.results.timeseries.csv.zip",full.names = F)
+        kfilescsv<-dir(path=i,pattern=".dem.results.csv.zip",full.names = F)
         kdf0<-rbind(kdf0,data.frame(dirfiles=i,kfilescsv=kfilescsv,stringsAsFactors = F))
 }
 kdf0$match_id<-sapply(strsplit(kdf0$kfilescsv,"\\."),function(i)i[[1]])
-
-
-
-
 
 # remove files already processed
 #stems<-data.frame(match_id=as.character(unique(dls$match_id)),done=T,stringsAsFactors = F)
 #kdf0<-left_join(kdf0,stems,by="match_id")
 #kdf0<-filter(kdf0,is.na(done))
 
-# read in aggregated data to get overall game stats
-agg<-fromJSON("/Users/asallaska/SFI/DOTA/data/raw/gameDetails.json")
-agg_ind<-sapply(unique(kdf0$match_id),function(i) which(names(agg)==i))
-gamestats<-data.frame()
-for (i in agg_ind){
-        agg_game<-agg[[i]] # isolate aggregated stats for relevant game
-        temp<-data.frame(agg_game$match_id,agg_game$radiant_win,agg_game$duration,agg_game$radiant_score,
-                         agg_game$dire_score,agg_game$leagueid,agg_game$start_time,agg_game$lobby_type,
-                         agg_game$game_mode)
-        gamestats<-rbind(gamestats,temp)
-}
-names(gamestats)[-1]<-gsub("agg\\_game","stats",names(gamestats)[-1])
-names(gamestats)[1]<-"match_id"
-gamestats$match_id<-as.character(gamestats$match_id)
-
 # fold game stats into file data frame in order to port into main dataframe, dls
+gamestats<-findGameStats()
 kdf0<-left_join(kdf0,gamestats,by="match_id")
 
 # to start from scratch (and not eliminate previously processed files)
@@ -229,11 +242,12 @@ n<-c(seq(1,nrow(kdf),8),nrow(kdf))
 # split up data frame into 8 parts in a list in order to parallel process
 kfileslist<-lapply(1:(length(n)-1),function(i) kdf[n[i]:(n[i+1]-1),])
 
-dls_save<-dls # so we don't have to repeat
+dls_save<-dls # so we don't have to repeat, if crash
 
-# make large data frame including each game in order to cluster
+### MAIN FUNCTION CALL ###
+# make large data frame including each game in order to cluster, main function of program
 dls<-data.frame()
-tagg<-60 # in seconds
+tagg<-60 # time to aggregate position over, in seconds
 for (i in 1:length(kfileslist)){
         print(c(i," of ",length(kfileslist))) # counter 
         ls<-mclapply(1:nrow(kfileslist[[i]]),function(j) extractSum(kfileslist[[i]][j,],tagg),mc.cores=nrow(kfileslist[[i]]))
@@ -242,7 +256,11 @@ for (i in 1:length(kfileslist)){
 #dls<-rbind(dls,dls_save)
 
 
-# test clustering to determine k
+### END MAIN FUNCTION CALL ###
+
+
+### CLUSTERING ### 
+# test clustering to determine number of clusters, k
 clustvar_xy_tot<-clustvarfun(100,dls[,grep("^x\\.|^y\\.",names(dls))],itermax=1000,tot=T)
 
 # plot explained variance as a function of cluster number
@@ -255,13 +273,13 @@ pdf(paste0("Var_Clusters_",match_id,"_60s_goldwinordered_NEW.pdf"),width=15,heig
 gc
 dev.off()
 
-# find clusters
+# find clusters for given number of clusters (25 here)
 k<-kmeans(dls[,grep("^x\\.|^y\\.",names(dls))],25,1000)
 dls$ClusterNo<-k$cluster
 
 # setup to send to SFIHMM
 dfx<-dls %>% select(match_id,ClusterNo) %>% rename(num=ClusterNo)
-dfx<-left_join(dfx,statetranslate,by="num")
+dfx<-left_join(dfx,statetranslate,by="num") # translate numbered clusters into letters with df statetranslate
 dls<-left_join(dls,rename(statetranslate,ClusterNo=num),by="ClusterNo")
 
 # make concatenated sequence.  insert dummy variable, "z", at the end of each game
@@ -279,6 +297,14 @@ write.table(matrix(c(length(seq),paste(seq,collapse="")),ncol=1,nrow=2),
 
 # save data to correlate to SFIHMM output
 write.csv(dls,"agg_raw_states.csv",row.names = F)
+
+
+
+
+#### END OF PRODUCING FILES FOR HMM
+
+
+
 
 ###### what do the clusters mean? ###### 
 # find average position for each hero for each cluster in order to plot
@@ -317,79 +343,3 @@ dls<-left_join(dls,gamestats,by="match_id")
 
 
 
-
-
-# find correlations to output of SFIHMM
-
-#### seq df is from seq.R !!!!!! 
-mod<-select(seq,seqno,ObservedChar,Module1)
-game<-as.character(unique(dls$match_id))
-# apply match_id to output of SFIHMM (which is just a list of states, uncorrelated to match_id)
-j<-1
-mod$match_id<-game[j]
-for (i in 2:nrow(mod)){
-        if (mod$ObservedChar[i]=="z") {
-                j<-j+1
-                mod$match_id[i]<-game[j]
-        }else{
-                mod$match_id[i]<-mod$match_id[i-1]
-        }
-}
-mod<-filter(mod,ObservedChar!="z") # remove dummy state
-modsum<-dplyr::summarize(group_by(mod,match_id),AvgModuleHL=mean(Module1)) # average over module 1 to see if correlations
-
-# from dls OR from previously written agg_raw_states.csv, find the stats and join to SFIHMM data
-dlsstats<-unique(dls[,c("match_id",grep("^stats\\.",names(dls),value=T))])
-dlsstats$match_id<-as.character(dlsstats$match_id)
-dlsstats<-left_join(dlsstats,modsum,by="match_id")
-dlsstats<-select(dlsstats,match_id,stats.GOLD.TeamWin:stats.duration,AvgModuleHL)
-dlsstats$stats.radiant_win<-as.numeric(dlsstats$stats.radiant_win)
-
-temp<-dlsstats[,2:7]-dlsstats[,8:13] # win stats - lose stats, net stats for winning team over losing team
-names(temp)<-paste0(gsub("\\.TeamWin","",names(temp)),".net")
-dlsstats<-cbind(dlsstats[,grep("TeamWin|TeamLose",names(dlsstats),invert=T)],temp)
-
-# various correlation plots
-
-col.corrgram<-function(ncol){
-        colorRampPalette(c("darkgoldenrod4","burlywood1","darkkhaki","darkgreen"))(ncol)
-}                
-corrgram(select(dlsstats,-match_id),order=T,lower.panel=panel.shade,upper.panel=panel.pts,
-         text.panel=panel.txt,main="x")
-
-
-panel.hist<-function(x,...){
-        usr <- par("usr"); on.exit(par(usr))
-        par(usr = c(usr[1:2], 0, 1.5) )
-        h <- hist(x, plot = FALSE)
-        breaks <- h$breaks; nB <- length(breaks)
-        y <- h$counts; y <- y/max(y)
-        rect(breaks[-nB], 0, breaks[-1], y, col="cyan", ...)
-}
-panel.smooth<-function (x, y, col = "blue", bg = NA, pch = 18, 
-                        cex = 0.8, col.smooth = "red", span = 2/3, iter = 3, ...) 
-{
-        points(x, y, pch = pch, col = col, bg = bg, cex = cex)
-        ok <- is.finite(x) & is.finite(y)
-        if (any(ok)) 
-                lines(stats::lowess(x[ok], y[ok], f = span, iter = iter), 
-                      col = col.smooth, ...)
-}
-panel.cor <- function(x, y, digits=2, cex.cor)
-{
-        usr <- par("usr"); on.exit(par(usr))
-        par(usr = c(0, 1, 0, 1))
-        r <- abs(cor(x, y))
-        txt <- format(c(r, 0.123456789), digits=digits)[1]
-        test <- cor.test(x,y)
-        Signif <- ifelse(round(test$p.value,3)<0.001,"p<0.001",paste("p=",round(test$p.value,3)))  
-        text(0.5, 0.25, paste("r=",txt))
-        text(.5, .75, Signif)
-}
-
-temp<-dlsstats
-names(temp)<-gsub("stats\\.","",names(temp))
-pdf("Correlations.pdf")
-pairs(select(temp,-match_id),lower.panel=panel.smooth,upper.panel=panel.cor,diag.panel=panel.hist)
-#pairs(select(dlsstats,grep("GOLD|win",names(dlsstats))),lower.panel=panel.smooth,upper.panel=panel.cor,diag.panel=panel.hist)
-dev.off()
