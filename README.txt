@@ -1,7 +1,8 @@
 This is a repository for analysis of DOTA 2 game data done for the Santa Fe Institute’s Complex 
-Systems Summer School (2016) using a hidden Markov model (HMM).  Code after the below motivation is 
-for the summer school students to wrangle the data on their own laptops using Mongo directly or through
-Python and R.  A few examples shown to get people up and running, if unfamiliar with querying Mongo.
+Systems Summer School (2016) using a hidden Markov model (HMM).  Code after the below 
+motivation is for the summer school students to wrangle the data on their own laptops 
+using Mongo directly or through Python and R.  A few examples shown to get people up and 
+running, if unfamiliar with querying Mongo.
 
 *** Motivation ***
 
