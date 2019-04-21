@@ -131,7 +131,8 @@ mongo.get.databases(mongo)
 cc <- "agg.progames"
 
 querymongo <- list(leagueid=list('$gt' = 0)) # query filtering
-queryfields <- list(leagueid=1L,match_id=1L,teamfights.start=1L,teamfights.end=1L,teamfights.last_death=1L,teamfights.deaths=1L) # fields to return
+queryfields <- list(leagueid=1L, match_id=1L, teamfights.start=1L, teamfights.end=1L, 
+          teamfights.last_death=1L, teamfights.deaths=1L) # fields to return
 
 mongo.count(mongo,cc,querymongo) # count records in cc
 
