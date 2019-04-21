@@ -7,7 +7,7 @@ are on GitHub; data is too massive to be easily hosted on this repository. The b
 instructions assume you have a local copy of the data or can connect to our databases 
 on virtual machines. 
 
-*** Motivation ***
+# Motivation
 
 
 The world of cyber intrusion detection often struggles to adapt its defensive tactics to its adversaries’ evolving strategies in real time.  Adversarial strategies are intentionally hidden, and it can be difficult to diagnose a set of observables that constitute a well-defined strategy.  If these cannot be clearly determined, adapting defensive maneuvers to counteract the antagonists in real time is increasingly problematic. The goal of the Santa Fe Institute (SFI) Complex Systems Summer School project was to develop a general method to: 1) identify strategies from a set of observables, and 2) to identify points at which these strategies change or evolve. 
@@ -22,13 +22,13 @@ Our preliminary results indicate a macro structure exists across multiple games 
 
 
 
-*** Specific information on data wrangling the DOTA 2 data ***
+# Specific information on data wrangling the DOTA 2 data 
 
 
 
 File structure is two folders of “raw” and “agg” (aggregated) data.
 
-***Info on files:  ***
+## Info on files:  
 
 Agg:
 -main file is proGames.json.  This will be put in the mongo database.  Aggregated for professional games. 
@@ -44,7 +44,7 @@ Raw:
 
 
 
-***Set up Mongo on mac:***
+## Set up Mongo on mac:
 
 - get home-brew
 
@@ -55,9 +55,9 @@ from terminal:
 
 
 
-***In order to put the files in the mongo db:***
+## In order to put the files in the mongo db
 
-**For aggregate data:**
+### For aggregate data
 
 from terminal:
 mongoimport --db agg --collection progames --type json --file path-to-json/proGames.json -j 4 --batchSize 1
@@ -66,7 +66,7 @@ change path-to-son and the number after flag “j” is number of cores of your 
 
 
 
-**For raw data:**
+### For raw data:
 
 from terminal:
 sh importmongoraw.sh
@@ -74,7 +74,7 @@ sh importmongoraw.sh
 This will loop over all files in the path you specify in the shell script.  Be sure to change these paths!  This puts the cleaned data in the database. This file is on the GitHub. 
 
 
-***Index for faster searching***
+### Index for faster searching
 
 An index can be added for each field you think you’ll be searching on often.  I will upload samples of code when I start indexing my database.  It takes a while to do but will help out with speed in the end.  
 
@@ -87,7 +87,7 @@ get current indexes
 
 
 
-***Sample ways of querying the mongo db from the terminal***
+### Sample ways of querying the mongo db from the terminal
 
 > mongo
 
@@ -102,7 +102,7 @@ show tables (show the tables in the database)
 db.collection.count(): count documents in collection in db
 db.progames.find({'players.account_id' : 89871557}) # nested fields 
 
-# show filtered on teamfights.deaths and show only certain columns
+// show filtered on teamfights.deaths and show only certain columns
 db.progames.findOne({'teamfights.deaths' : 4},{'teamfights.start':1,'teamfights.end':1,'teamfights.deaths':1})
 
 Limit results and greater than logic
@@ -118,7 +118,7 @@ db.games.find({'leagueid': 0}).count()
 
 
 
-***Within R***
+#### Within R
 
 library(rmongodb)
 mongo<-mongo.create()
@@ -134,7 +134,7 @@ ldf<-mongo.find.all(mongo,cc,querymongo,fields=queryfields,limit=50L) # main que
 
 
 
-***Within python ***
+### Within python 
 import pymongo
 from pymongo import MongoClient
 client = MongoClient() # i think
