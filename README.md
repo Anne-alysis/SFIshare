@@ -134,7 +134,7 @@ ldf<-mongo.find.all(mongo,cc,querymongo,fields=queryfields,limit=50L) # main que
 
 
 
-### Within python 
+#### Within python 
 import pymongo
 from pymongo import MongoClient
 client = MongoClient() # i think
