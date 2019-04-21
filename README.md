@@ -122,23 +122,33 @@ count records in a query
 #### Within R
 
 > library(rmongodb)
+
 > mongo <- mongo.create()
+
 > mongo.is.connected(mongo)
+
 > mongo.get.databases(mongo)
 
 > cc <- "agg.progames"
 
 > querymongo <- list(leagueid=list('$gt' = 0)) # query filtering
+
 > queryfields <- list(leagueid=1L,match_id=1L,teamfights.start=1L,teamfights.end=1L,teamfights.last_death=1L,teamfights.deaths=1L) # fields to return
+
 > mongo.count(mongo,cc,querymongo) # count records in cc
+
 > ldf <- mongo.find.all(mongo,cc,querymongo,fields=queryfields,limit=50L) # main query, set query and returned fields
 
 
 
 #### Within python 
 > import pymongo
+
 > from pymongo import MongoClient
+
 > client = MongoClient() # i think
+
 > db = client.agg
+
 > db.collection_names()
 
