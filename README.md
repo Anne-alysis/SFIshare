@@ -60,7 +60,7 @@ from terminal:
 ### For aggregate data
 
 from terminal:
-mongoimport --db agg --collection progames --type json --file path-to-json/proGames.json -j 4 --batchSize 1
+> mongoimport --db agg --collection progames --type json --file path-to-json/proGames.json -j 4 --batchSize 1
 
 change path-to-son and the number after flag “j” is number of cores of your laptop.  This will create a database called “agg” with a collection of “progames”.  In mongo, a collection is like a table in SQL.  
 
@@ -69,7 +69,7 @@ change path-to-son and the number after flag “j” is number of cores of your 
 ### For raw data:
 
 from terminal:
-sh importmongoraw.sh
+> sh importmongoraw.sh
 
 This will loop over all files in the path you specify in the shell script.  Be sure to change these paths!  This puts the cleaned data in the database. This file is on the GitHub. 
 
@@ -96,23 +96,24 @@ within mongo:
 Mongo Queries
 
 show dbs (show your databases, should be raw and agg)
-use db (this sets the database you will you will use) 
-db.collection.fineOne() (e.g., db.raw.findOne())
-show tables (show the tables in the database) 
-db.collection.count(): count documents in collection in db
-db.progames.find({'players.account_id' : 89871557}) # nested fields 
+> use db (this sets the database you will you will use) 
+> db.collection.fineOne() (e.g., db.raw.findOne())
 
-// show filtered on teamfights.deaths and show only certain columns
-db.progames.findOne({'teamfights.deaths' : 4},{'teamfights.start':1,'teamfights.end':1,'teamfights.deaths':1})
+show tables (show the tables in the database) 
+> db.collection.count(): count documents in collection in db
+> db.progames.find({'players.account_id' : 89871557}) # nested fields 
+
+show filtered on teamfights.deaths and show only certain columns
+> db.progames.findOne({'teamfights.deaths' : 4},{'teamfights.start':1,'teamfights.end':1,'teamfights.deaths':1})
 
 Limit results and greater than logic
-db.progames.find({'leagueid': {$gt:1000}},{'match_id':1,'leagueid':1}).limit(5)
+> db.progames.find({'leagueid': {$gt:1000}},{'match_id':1,'leagueid':1}).limit(5)
 
 find Null values
-db.progames.find({'radiant_gold_adv': null},{'match_id':1,'leagueid':1}).limit(5)
+> db.progames.find({'radiant_gold_adv': null},{'match_id':1,'leagueid':1}).limit(5)
 
 count records in a query
-db.games.find({'leagueid': 0}).count() 
+> db.games.find({'leagueid': 0}).count() 
 
 
 
